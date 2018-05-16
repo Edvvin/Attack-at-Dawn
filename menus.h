@@ -1,53 +1,81 @@
 #include <curses.h>
+#include <stdlib.h>
+#include <ctype.h>
 #define MAX_MENUS 20
 #define MAX_COLUMNS 20
 #define MAX_NAME_LEN 20
-#define MAX_SELECT 1000
+#define MAX_SELECT 2000
+#define MAX_ERROR_MESSAGE_LEN 100
+#define MENUS_ERR 0
+#define MENUS_OK 1
 
-typedef struct prog{
-    int number_of_menus;
+static PROG* active_prog = NULL;
+
+typedef enum menus_error {
+    M_ERR_NO_INITIALIZED_PROG, M_ERR_NULL_PONITER, M_ERR_OVERFLOW, M_ERR_UNDERFLOW, M_ERR_ALLOC, M_ERR_FIELD_POSITION_FILLED
+} MENUS_ERROR;
+
+static MENUS_ERROR m_err;
+
+typedef struct prog {
+    int number_of_menus, top, is_stopped,column_height;
     MENU *menus[MAX_MENUS];
-    char menu_names[MAX_MENUS][MAX_NAME_LEN];
-    MENU* active_menu;
+    char *menu_names[MAX_MENUS];
+    MENU* menu_stack[MAX_MENUS];
 } PROG;
 
-typedef struct menu{
+typedef struct menu {
     int number_of_columns;
     COLUMN* columns[MAX_COLUMNS];
-    MENU* super_menu;
+    char *column_names[MAX_COLUMNS], menu_name[MAX_NAME_LEN];
+    FIELD* cursor_field;
+    COLUMN* cursor_column;
 } MENU;
 
-typedef struct column{
-    int height,width,number_of_fields,first_visible;
+typedef struct column {
+    int number_of_fields, number_of_selected,width;
     WINDOW *win;
-    FIELD *fields, *selected_fields[MAX_SELECT];
-    
+    char column_name[MAX_NAME_LEN];
+    FIELD *first, *last, *first_visible,*first_selected,*last_selected;
 } COLUMN;
 
-typedef struct field{
-    void *x,(*f)(PROG);
-    char field_name[MAX_NAME_LEN 20],*field_string;
-    int isSelected;
-    struct field* next;
-}FIELD;
+typedef struct field {
+    void *x, (*f)(void);
+    char field_name[MAX_NAME_LEN], *field_string;
+    int is_selected,position;
+    struct field *next, *prev,*next_select,*prev_select;
+} FIELD;
 
 
-PROG* new_prog();
-void add_menu(MENU* M);
+int init_prog();
+int run_prog(MENU startMenu);
+int stop_prog();
+int end_prog();
+MENU* get_active_menu();
 
 //Menu related functions
 MENU* get_menu(char* menuName);
 MENU* new_menu(char* menuName);
-void run_menu(MENU* M);
-void add_column(MENU* M,COLUMN* C);
+int update_menu(MENU* M);
+int add_column(MENU* M, COLUMN* C);
+int prev_menu();
+int next_menu(MENU* M);
+
 
 //Column related functions
-COLUMN* get_column(char* menuName,char* columnName);
-COLUMN* new_column(char* columnName);
-void add_field(COLUMN* C,FIELD F);
-void print_column(COLUMN);
+COLUMN* get_column(MENU* M, char* columnName);
+COLUMN* new_column(char* columnName,int width);
+int add_field(COLUMN* C, FIELD F);
+int print_column(COLUMN* C);
 
 //Field related functions
-FIELD* get_field(char* menuName,char* columnName,char* fieldName);
-FIELD* new_field(void* x,void (*f)(PROG),char* fieldName,char* fieldString);
-void execute(FIELD F);
+FIELD* get_field(COLUMN* C, char* fieldName);
+FIELD* new_field(void* x, void (*f)(void), char* fieldName, char* fieldString);
+int execute(FIELD F);
+int select(FIELD F);
+
+//cursor
+int cursor_up();
+int cursor_down();
+int cursor_left();
+int cursor_right();
