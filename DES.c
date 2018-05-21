@@ -249,7 +249,6 @@ blok DES_decrypt_blok(blok b,blok k)
 
 blok DES_blok(blok b,blok k,char sifra)             //sifra = 0 - enkripcija; sifra != 0 - dekripcija
 {
-    ispisiblok(b);
     blok novi=permute(b,ip,iplen),*keys=generatesubkeys(permute(k,pc1,pc1len));
     char c,i,i0=0,i15=16,di=1;
     if (sifra)
@@ -289,7 +288,6 @@ char* writePath(char* path)
     strncpy(newpath,path,i);
     strcat(newpath,"novi");
     strcat(newpath,path+i);
-    printf("novi:\n%s\n",newpath);
     return(newpath);
 }
 
@@ -299,12 +297,6 @@ void DES_file(char* path,blok k,char sifra)     //sifra = 0 - enkripcija; 1 - de
     FILE *f,*newf;
     char *newpath=writePath(path),c;
     blok b=nula();
-    /*//////////////////////////////
-    printf("path:\n");
-    while (path[i])
-        printf("%c",path[i++]);
-    printf("\n");
-    */
     f=fopen(path,"rb");
     newf=fopen(newpath,"wb");
     i=0;
@@ -396,47 +388,4 @@ void ispisiblok(blok b)
     printf("\n");
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/* main ne sme?
-int main()
-{
 
-
-
-    /*
-    int i;
-    blok x=nula(),k=nula();
-    blok* ki;
-    //printf("Unesi M:\n");
-    //x=ucitajblok();
-
-    printf("Unesi K:\n");
-    k=ucitajblok();
-
-    DES_file("ezekiel2517.txt",k,0);
-    DES_file("ezekiel2517novi.txt",k,1);
-
-    printf("nije ovo trebalo da se pozove, ups...\n");
-    printf("kolic je idiot\n");
-
-
-    //printf("M:\n");
-    //ispisiblok(x);
-    //printf("K:\n");
-    //ispisiblok(k);
-    //x=permute(x,p,plen);
-    //ki=generatesubkeys(x);
-    x=DES_encrypt_blok(x,k);
-    printf("resultat enkripcije:\n");
-    ispisiblok(x);
-    x=DES_decrypt_blok(x,k);
-    printf("resultat dekripcije:\n");
-    ispisiblok(x);
-    //printf("keys:\n");
-    //for (i=0;i<16;i++)
-    //    ispisiblok(ki[i]);
-    //printf("%d",sizeof(x));
-
-    return 0;
-}
-*/
