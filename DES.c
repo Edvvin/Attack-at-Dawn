@@ -297,17 +297,28 @@ void DES_file(char* path,blok k,char sifra)     //sifra = 0 - enkripcija; 1 - de
     FILE *f,*newf;
     char *newpath=writePath(path),c;
     blok b=nula();
+    /*//////////////////////////////
+    printf("path:\n");
+    while (path[i])
+        printf("%c",path[i++]);
+    printf("\n");
+    */
     f=fopen(path,"rb");
     newf=fopen(newpath,"wb");
+    if (!f || !newf)
+    {
+        printf("Neuspesno otvaranje fajlova!\n");
+        return(1);
+    }
     i=0;
-    while (f!=NULL && (c=fgetc(f))!=EOF)
+    while (fread(&c,sizeof(char),1,f)==1)
     {
         b.a[i++]=c;
         if (i==8)
         {
             b=DES_blok(b,k,sifra);
             for (i=0;i<8;i++)
-                fprintf(newf,"%c",b.a[i]);
+                fwrite(b.a+i,sizeof(char),1,newf);
             i=0;
             b=nula();
         }
