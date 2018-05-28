@@ -17,7 +17,8 @@ typedef struct
 void DES_encrypt_file(char*,blok);
 void DES_decrypt_file(char*,blok);
 
-
+void triple_DES_encrypt_file(char*,blok,blok);
+void triple_DES_decrypt_file(char*,blok,blok);
 
 
 blok nula();

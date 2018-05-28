@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "D:\Andy\AES i DES\Attack-at-Dawn\hash.h"
 
 char pc1[]={57,49,41,33,25,17,9,1,58,50,42,34,26,18,10,2,59,51,43,35,27,19,11,3,60,52,44,36,63,55,47,39,31,23,15,7,62,54,46,38,30,22,14,6,61,53,45,37,29,21,13,5,28,20,12,4},
     pc2[]={14,17,11,24,1,5,3,28,15,6,21,10,23,19,12,4,26,8,16,7,27,20,13,2,41,52,31,37,47,55,30,40,51,45,33,48,44,49,39,56,34,53,46,42,50,36,29,32},
@@ -65,33 +66,27 @@ blok permute(blok x,char* c,char l)
 
 char shiftleft8(char c,char *prvi,char *drugi,char br)
 {
-    //printf("shiftleft8 in da house!\n");
     char first=c&(1<<7),second=c&(1<<6);
     char nc=c<<br;
     if (br==1)
     {
-        //printf("br je 1\n");
         if (*prvi)
             nc|=1;
     }
     if (br==2)
     {
-        //printf("br je 2\n");
         if (*prvi)
             nc|=2;
         if (*drugi)
             nc|=1;
     }
-    //printf("br je izaso\n");
     *prvi=first;
     *drugi=second;
-    //printf("shiftleft8 OUT da house!\n");
     return(nc);
 }
 
 blok shiftleft28(blok b,char br)
 {
-    //printf("shiftleft28 in da house!\n");
     blok novi=nula();
     char i,leviprvi=b.a[0]&(1<<7),levidrugi=b.a[0]&(1<<6),desniprvi=b.a[3]&(1<<3),desnidrugi=b.a[3]&(1<<2),*prvi=(char*)calloc(1,sizeof(char)),*drugi=(char*)calloc(1,sizeof(char));
     for (i=6;i>=0;i--)
@@ -118,7 +113,6 @@ blok shiftleft28(blok b,char br)
         if (desnidrugi)
             novi.a[6]|=1;
     }
-    //printf("shiftleft28 OUT da house!\n");
     return(novi);
 }
 
@@ -129,7 +123,6 @@ blok* generatesubkeys(blok key)
    b[0]=shiftleft28(key,shl[0]);
    for (i=1;i<16;i++)
    {
-       //printf("veliko i je %d\n",i);
        b[i]=shiftleft28(b[i-1],shl[i]);
    }
    for (i=0;i<16;i++)
@@ -139,9 +132,6 @@ blok* generatesubkeys(blok key)
 
 char replace6(unsigned char b,char d)     //koriste se samo levih 6 bita char-a b
 {
-    //printf("Treba zameniti: ");
-    //ispisbinarni(b);
-    //printf("\tkoristeci S%d\n",d+1);
     unsigned char r=0,k=0;
     if (b&(1<<7))
         r+=2;
@@ -149,8 +139,6 @@ char replace6(unsigned char b,char d)     //koriste se samo levih 6 bita char-a 
         r+=1;
     k=b<<1;
     k>>=4;
-    //printf("red: %d\tkolona: %d\n",r,k);
-    //printf("Zamena je %d\n",S[d][r*16+k]);
     return(S[d][r*16+k]);
 }
 
@@ -201,55 +189,10 @@ blok LiRi(blok stari,blok k)
     return(novi);
 }
 
-/*
-blok DES_encrypt_blok(blok b,blok k)
-{
-    blok novi=permute(b,ip,iplen),*keys=generatesubkeys(permute(k,pc1,pc1len));
-    char c,i;
-    printf("enkripcija korak 1:\n");
-    ispisiblok(novi);
-    for (i=0;i<16;i++)
-        novi=LiRi(novi,keys[i]);
-    printf("enkripcija korak 2:\n");
-    ispisiblok(novi);
-    for (i=0;i<4;i++)
-    {
-        c=novi.a[i];
-        novi.a[i]=novi.a[i+4];
-        novi.a[i+4]=c;
-    }
-    printf("enkripcija korak 3:\n");
-    ispisiblok(novi);
-    novi=permute(novi,ip1,ip1len);
-    return(novi);
-}*/
 
-/*
-blok DES_decrypt_blok(blok b,blok k)
+blok DES_blok(blok b,blok *keys,char sifra)             //sifra = 0 - enkripcija; sifra != 0 - dekripcija
 {
-    blok novi=permute(b,ip,iplen),*keys=generatesubkeys(permute(k,pc1,pc1len));
-    char c,i;
-    printf("dekripcija korak 1:\n");
-    ispisiblok(novi);
-    for (i=15;i>=0;i--)
-        novi=LiRi(novi,keys[i]);
-    printf("dekripcija korak 2:\n");
-    ispisiblok(novi);
-    for (i=0;i<4;i++)
-    {
-        c=novi.a[i];
-        novi.a[i]=novi.a[i+4];
-        novi.a[i+4]=c;
-    }
-    printf("dekripcija korak 3:\n");
-    ispisiblok(novi);
-    novi=permute(novi,ip1,ip1len);
-    return(novi);
-}*/
-
-blok DES_blok(blok b,blok k,char sifra)             //sifra = 0 - enkripcija; sifra != 0 - dekripcija
-{
-    blok novi=permute(b,ip,iplen),*keys=generatesubkeys(permute(k,pc1,pc1len));
+    blok novi=permute(b,ip,iplen)/*,*keys=generatesubkeys(permute(k,pc1,pc1len))*/;
     char c,i,i0=0,i15=16,di=1;
     if (sifra)
     {
@@ -269,65 +212,73 @@ blok DES_blok(blok b,blok k,char sifra)             //sifra = 0 - enkripcija; si
     return(novi);
 }
 
-blok DES_encrypt_blok(blok b,blok k)
+blok DES_encrypt_blok(blok b,blok *keys)
 {
-    return(DES_blok(b,k,0));
+    return(DES_blok(b,keys,0));
 }
 
-blok DES_decrypt_blok(blok b,blok k)
+blok DES_decrypt_blok(blok b,blok *keys)
 {
-    return(DES_blok(b,k,1));
+    return(DES_blok(b,keys,1));
 }
 
-char* writePath(char* path)
+char* writePath(char* path)//treba pozvati srand u mainu
 {
-    int len=strlen(path),i=len-1;
-    char *newpath=(char*)calloc(len+5,sizeof(char));
+    int len=strlen(path),i=len-1,dodatak,j=0;
+    char *newpath=(char*)calloc(len+5,sizeof(char)),*tmppath=(char*)calloc(len+5,sizeof(char));
+    FILE *f;
     while (path[i]!='.')
         i--;
     strncpy(newpath,path,i);
-    strcat(newpath,"novi");
+    strcpy(tmppath,path);
+    while (f=fopen(tmppath,"r"))
+    {
+        fclose(f);
+        dodatak=rand()%10;
+        newpath[i+j++]=dodatak+'0';
+        strncpy(tmppath,newpath,i+j);
+        tmppath[i+j]=0;
+        strcat(tmppath,path+i);
+    }
     strcat(newpath,path+i);
     return(newpath);
 }
 
-void DES_file(char* path,blok k,char sifra)     //sifra = 0 - enkripcija; 1 - dekripcija
+void DES_file(char* path,char* newpath,blok *keys,char sifra,char sameFile,char fajlImaHash)     //sifra = 0 - enkripcija; 1 - dekripcija
 {
-    int i,removePadding=8;
+    int i,removePadding=8,textLength;
     FILE *f,*newf;
-    char *newpath=writePath(path),c;
+    char /**newpath=writePath(path),*/c;
     blok b=nula();
-    /*//////////////////////////////
-    printf("path:\n");
-    while (path[i])
-        printf("%c",path[i++]);
-    printf("\n");
-    */
     f=fopen(path,"rb");
-    newf=fopen(newpath,"wb");
+    fseek(f,0,SEEK_END);
+    textLength=ftell(f)-fajlImaHash*sizeof(long long);
+    rewind(f);
+    newf=fopen(newpath,"wb+");
     if (!f || !newf)
     {
         printf("Neuspesno otvaranje fajlova!\n");
         return(1);
     }
     i=0;
-    while (fread(&c,sizeof(char),1,f)==1)
+    while (textLength)
     {
+        fread(&c,sizeof(char),1,f);
         b.a[i++]=c;
         if (i==8)
         {
-            b=DES_blok(b,k,sifra);
+            b=DES_blok(b,keys,sifra);
             for (i=0;i<8;i++)
                 fwrite(b.a+i,sizeof(char),1,newf);
             i=0;
             b=nula();
         }
-        //putchar(c);
+        textLength--;
     }
     //TODO: REMOVE PADDING; ne znam kako da ga odradim, za tekst je lako, ali ako treba da radi za sve tipove fajlova nzm
     if (i>0)
     {
-        b=DES_blok(b,k,sifra);
+        b=DES_blok(b,keys,sifra);
         for (i=0;i<removePadding;i++)
             fprintf(newf,"%c",b.a[i]);
         i=0;
@@ -336,16 +287,100 @@ void DES_file(char* path,blok k,char sifra)     //sifra = 0 - enkripcija; 1 - de
     //printf("\n");
     fclose(f);
     fclose(newf);
+    if (sameFile)
+    {
+        f=fopen(path,"wb");
+        newf=fopen(newpath,"rb");
+        while (fread(&c,sizeof(char),1,newf)==1)
+            fwrite(&c,sizeof(char),1,f);
+        fclose(f);
+        fclose(newf);
+        int brisanje=remove(newpath);
+        printf("brisanje = %d\n",brisanje);
+    }
 }
 
 void DES_encrypt_file(char* path,blok k)
 {
-    DES_file(path,k,0);
+    long long hes;
+    char *kljuc=(char*)calloc(8,sizeof(char)),*newpath=writePath(path),i;
+
+    blok *keys=generatesubkeys(k);
+    DES_file(path,newpath,keys,0,0,0);
+
+
+
+
+    for (i=0;i<8;i++)
+        kljuc[i]=k.a[i];
+    hes=mojHash(newpath,0,kljuc,8,17);
+    upisiHash(newpath,hes);
 }
 
-void DES_decrypt_file(char* path,blok k)
+/*
+long long mojHash(FILE *f,char fajlVecImaHash,char *kljuc,char duzinaKljuca,int metod)
+*/
+int DES_decrypt_file(char* path,blok k)//vraca 0 ako je kljuc ili metod pogresan
 {
-    DES_file(path,k,1);
+    long long target=procitajHash(path),pokusaj;
+    blok *keys=generatesubkeys(k);
+    char *newpath=writePath(path),*kljuc=(char*)calloc(8,sizeof(char)),i;
+
+
+    printf("target is %lld\n",target);
+
+    for (i=0;i<8;i++)
+        kljuc[i]=k.a[i];
+    pokusaj=mojHash(path,1,kljuc,8,17);
+    printf("pokusaj is %lld\n",pokusaj);
+    if (pokusaj!=target)
+    {
+        printf("pogresno!\n");
+        return(0);
+    }
+    DES_file(path,newpath,keys,1,0,1);
+    return(1);
+}
+
+void triple_DES_encrypt_file(char* path,blok k1,blok k2)            //treba optimizovati ovaj deo, ne bi trebalo da se poziva generatesubkeys() za svaki blok, vec samo jednom za dati kljuc
+{
+    long long hes;
+    char *newpath=writePath(path),*tmppath,*kljuc=(char*)calloc(16,sizeof(char)),i;
+    blok *keys1=generatesubkeys(k1),*keys2=generatesubkeys(k2);
+
+    DES_file(path,newpath,keys1,0,0,0);
+    tmppath=writePath(newpath);
+    DES_file(newpath,tmppath,keys2,1,1,0);
+    DES_file(newpath,tmppath,keys1,0,1,0);
+
+    for (i=0;i<15;i++)
+        kljuc[i]=i<8?k1.a[i]:k2.a[i-8];
+    hes=mojHash(newpath,0,kljuc,16,71);
+    upisiHash(newpath,hes);
+}
+
+int triple_DES_decrypt_file(char* path,blok k1,blok k2)            //takodje treba ocisti kreaciju milion fajlova
+{
+    long long target=procitajHash(path),pokusaj;
+    char *newpath=writePath(path),*tmppath,*kljuc=(char*)calloc(16,sizeof(char)),i;
+    blok *keys1=generatesubkeys(k1),*keys2=generatesubkeys(k2);
+
+    for (i=0;i<15;i++)
+        kljuc[i]=i<8?k1.a[i]:k2.a[i-8];
+    pokusaj=mojHash(path,1,kljuc,16,71);
+    if (pokusaj!=target)
+        return(0);
+
+
+
+    DES_file(path,newpath,keys1,1,0,1);
+    tmppath=writePath(newpath);
+    DES_file(newpath,tmppath,keys2,0,1,0);
+    DES_file(newpath,tmppath,keys1,1,1,0);
+
+    return(1);
+
+
 }
 
 //////////////////////////////////funkcije za testiranje, suvisne za krajnju verziju
@@ -359,7 +394,6 @@ char charodbinarnog()
         scanf("%d",&x);
         if (x==1)
             c+=1<<(7-i);
-        //printf("malo i je %d\n",i);
     }
     return(c);
 }
@@ -380,11 +414,7 @@ blok ucitajblok()
     int i,x;
     blok b;
     for (i=0;i<8;i++)
-    {
-        //scanf("%d",&x);
         b.a[i]=charodbinarnog();
-        //printf("i je %d\n",i);
-    }
     return(b);
 }
 
