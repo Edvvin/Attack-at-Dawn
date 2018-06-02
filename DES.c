@@ -47,6 +47,15 @@ blok nula()
     return(x);
 }
 
+blok konstruktor(char *c)
+{
+    blok x;
+    int i;
+    for (i=0;i<8;i++)
+        x.a[i]=c[i];
+    return(x);
+}
+
 void setblokbit(blok* x,blok b,char xd,char bd)
 {
     unsigned char mask=255^1<<(7-(xd%8)),mm=b.a[bd/8]&(1<<(7-(bd%8)));
@@ -257,7 +266,7 @@ void DES_file(char* path,char* newpath,blok *keys,char sifra,char sameFile,char 
     newf=fopen(newpath,"wb+");
     if (!f || !newf)
     {
-        printf("Neuspesno otvaranje fajlova!\n");
+        //printf("Neuspesno otvaranje fajlova!\n");
         return(1);
     }
     i=0;
@@ -296,81 +305,91 @@ void DES_file(char* path,char* newpath,blok *keys,char sifra,char sameFile,char 
         fclose(f);
         fclose(newf);
         int brisanje=remove(newpath);
-        printf("brisanje = %d\n",brisanje);
+        //printf("brisanje = %d\n",brisanje);
     }
 }
 
-void DES_encrypt_file(char* path,blok k)
+int DES_encrypt_file(char* path,char *c)
 {
-    long long hes;
-    char *kljuc=(char*)calloc(8,sizeof(char)),*newpath=writePath(path),i;
+    FILE *f=fopen(path,"rb");
+    if (!f)
+        return(-1);
+    fclose(f);
 
-    blok *keys=generatesubkeys(k);
+    long long hes;
+    char *newpath=writePath(path),i;
+
+    blok k=konstruktor(c),*keys=generatesubkeys(k);
     DES_file(path,newpath,keys,0,0,0);
 
 
-
-
-    for (i=0;i<8;i++)
-        kljuc[i]=k.a[i];
-    hes=mojHash(newpath,0,kljuc,8,17);
+    hes=mojHash(newpath,0,c,8,17);
     upisiHash(newpath,hes);
+    return(0);
 }
 
 /*
 long long mojHash(FILE *f,char fajlVecImaHash,char *kljuc,char duzinaKljuca,int metod)
 */
-int DES_decrypt_file(char* path,blok k)//vraca 0 ako je kljuc ili metod pogresan
+int DES_decrypt_file(char* path,char *c)//vraca 1 ako je kljuc ili metod pogresan
 {
+    FILE *f=fopen(path,"rb");
+    if (!f)
+        return(-1);
+    fclose(f);
+
     long long target=procitajHash(path),pokusaj;
-    blok *keys=generatesubkeys(k);
-    char *newpath=writePath(path),*kljuc=(char*)calloc(8,sizeof(char)),i;
+    blok k=konstruktor(c),*keys=generatesubkeys(k);
+    char *newpath=writePath(path),i;
 
 
-    printf("target is %lld\n",target);
-
-    for (i=0;i<8;i++)
-        kljuc[i]=k.a[i];
-    pokusaj=mojHash(path,1,kljuc,8,17);
-    printf("pokusaj is %lld\n",pokusaj);
+    pokusaj=mojHash(path,1,c,8,17);
     if (pokusaj!=target)
     {
-        printf("pogresno!\n");
-        return(0);
+        //printf("pogresno!\n");
+        return(1);
     }
     DES_file(path,newpath,keys,1,0,1);
-    return(1);
+    return(0);
 }
 
-void triple_DES_encrypt_file(char* path,blok k1,blok k2)            //treba optimizovati ovaj deo, ne bi trebalo da se poziva generatesubkeys() za svaki blok, vec samo jednom za dati kljuc
+int triple_DES_encrypt_file(char* path,char *c)
 {
+    FILE *f=fopen(path,"rb");
+    if (!f)
+        return(-1);
+    fclose(f);
     long long hes;
-    char *newpath=writePath(path),*tmppath,*kljuc=(char*)calloc(16,sizeof(char)),i;
-    blok *keys1=generatesubkeys(k1),*keys2=generatesubkeys(k2);
+    char *newpath=writePath(path),*tmppath,i;
+    blok k1=konstruktor(c),k2=konstruktor(c+8),*keys1=generatesubkeys(k1),*keys2=generatesubkeys(k2);
+
 
     DES_file(path,newpath,keys1,0,0,0);
     tmppath=writePath(newpath);
     DES_file(newpath,tmppath,keys2,1,1,0);
     DES_file(newpath,tmppath,keys1,0,1,0);
 
-    for (i=0;i<15;i++)
-        kljuc[i]=i<8?k1.a[i]:k2.a[i-8];
-    hes=mojHash(newpath,0,kljuc,16,71);
+
+    hes=mojHash(newpath,0,c,16,71);
     upisiHash(newpath,hes);
+    return(0);
 }
 
-int triple_DES_decrypt_file(char* path,blok k1,blok k2)            //takodje treba ocisti kreaciju milion fajlova
+int triple_DES_decrypt_file(char* path,char *c/*blok k1,blok k2*/)
 {
+    FILE *f=fopen(path,"rb");
+    if (!f)
+        return(-1);
+    fclose(f);
+
     long long target=procitajHash(path),pokusaj;
-    char *newpath=writePath(path),*tmppath,*kljuc=(char*)calloc(16,sizeof(char)),i;
-    blok *keys1=generatesubkeys(k1),*keys2=generatesubkeys(k2);
+    char *newpath=writePath(path),*tmppath,i;
+    blok k1=konstruktor(c),k2=konstruktor(c+8),*keys1=generatesubkeys(k1),*keys2=generatesubkeys(k2);
 
-    for (i=0;i<15;i++)
-        kljuc[i]=i<8?k1.a[i]:k2.a[i-8];
-    pokusaj=mojHash(path,1,kljuc,16,71);
+
+    pokusaj=mojHash(path,1,c,16,71);
     if (pokusaj!=target)
-        return(0);
-
+        return(1);
 
 
     DES_file(path,newpath,keys1,1,0,1);
@@ -378,7 +397,7 @@ int triple_DES_decrypt_file(char* path,blok k1,blok k2)            //takodje tre
     DES_file(newpath,tmppath,keys2,0,1,0);
     DES_file(newpath,tmppath,keys1,1,1,0);
 
-    return(1);
+    return(0);
 
 
 }

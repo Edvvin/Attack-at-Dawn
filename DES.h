@@ -14,11 +14,16 @@ typedef struct
 #endif
 
 
-void DES_encrypt_file(char*,blok);
-void DES_decrypt_file(char*,blok);
+//void DES_encrypt_file(char*,blok);
+int DES_encrypt_file(char* path,char *c);
+//void DES_decrypt_file(char*,blok);
+int DES_decrypt_file(char* path,char *c);
 
-void triple_DES_encrypt_file(char*,blok,blok);
-void triple_DES_decrypt_file(char*,blok,blok);
+
+//void triple_DES_encrypt_file(char*,blok,blok);
+int triple_DES_encrypt_file(char* path,char *c);
+//void triple_DES_decrypt_file(char*,blok,blok);
+int triple_DES_decrypt_file(char* path,char *c);
 
 
 blok nula();

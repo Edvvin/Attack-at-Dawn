@@ -20,7 +20,7 @@ int stringHash(char *path,char fajlVecImaHash)//potrebno samo citanje iz fajla
 		if (g != 0) hashVal ^= g >> 24;
 		hashVal &= ~g;
 	}
-	printf("hashVal = %d\n",hashVal);
+	//printf("hashVal = %d\n",hashVal);
 	fclose(f);
 	return hashVal;
 }
@@ -39,7 +39,7 @@ long long mojHash(char *path,char fajlVecImaHash,char *kljuc,char duzinaKljuca,i
         //scanf("%d",&j);
         i+=4;
     }
-    printf("hes = %lld\n",hes);
+    //printf("hes = %lld\n",hes);
     return(hes);
 }
 
@@ -58,6 +58,6 @@ void upisiHash(char *path,long long hes)//potrebno samo pisanje u fajl
     FILE *f=fopen(path,"ab");
     //fseek(f,0,SEEK_END);
     int succ=fwrite(&hes,sizeof(long long),1,f);
-    printf("succ = %d\n",succ);
+    //printf("succ = %d\n",succ);
     fclose(f);
 }
