@@ -6,6 +6,10 @@
 #include <string.h>
 #include <wchar.h>
 
+void nothing2(){
+    
+}
+
 int init_prog() {
     if (active_prog) {
         m_err = M_ERR_PROG_ALREADY_ACTIVE;
@@ -19,6 +23,7 @@ int init_prog() {
     active_prog = p;
     active_prog->is_stopped = 1;
     active_prog->top = 0;
+    active_prog->update = nothing2;
     struct winsize w;
     /*
         ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
@@ -69,28 +74,43 @@ void stop_prog() {
     }
     active_prog->is_stopped = 1;
 }
-
+void set_update(void(*update)(void)){
+    if(!active_prog)
+        return;
+    active_prog->update = update;
+}
 int end_prog() {
     if (!active_prog) {
         m_err = M_ERR_NO_INITIALIZED_PROG;
         return MENUS_ERR;
     }
+    int n = 0;
+    for (int i = 0; i < active_prog->number_of_menus; i++) {
+        MENU* M = active_prog->menus[i];
+        n += M->number_of_columns;
+    }
+
+    COLUMN **q = malloc(sizeof (COLUMN*) * n);
+    n = 0;
     for (int i = 0; i < active_prog->number_of_menus; i++) {
         MENU* M = active_prog->menus[i];
         for (int j = 0; j < M->number_of_columns; j++) {
             COLUMN* C = M->columns[j];
-            FIELD* temp1 = C->first;
-            FIELD* temp2 = temp1;
-            while (temp1) {
-                temp1 = temp1->next;
-                free_field(temp2);
-                temp2 = temp1;
+            if (!C->is_designated) {
+                while (C->first) {
+                    remove_field(C, C->first);
+                }
+                delwin(C->win);
+                C->is_designated = 1;
+                q[n++] = C;
             }
-            delwin(C->win);
-            free(C);
         }
         free(M);
     }
+    for(int i = 0;i<n;i++){
+        free(q[i]);
+    }
+    free(q);
     edvin();
     free(active_prog);
     active_prog = NULL;
@@ -247,6 +267,7 @@ int update_menu(MENU* M) {
         m_err = M_ERR_NULL_PONITER;
         return MENUS_ERR;
     }
+    active_prog->update();
     refresh();
     print_menu(M);
     chtype input = getch();
@@ -319,7 +340,7 @@ COLUMN* new_column(char* columnName, char* columnTitle, int width) {
     strcpy(col->column_name, columnName);
     strcpy(col->column_title, columnTitle);
     col->width = width;
-    col->a_bor = col->b_bor = col->hasBorder = 0;
+    col->a_bor = col->b_bor = col->hasBorder = col->is_designated = 0;
     return col;
 }
 
@@ -356,19 +377,20 @@ FIELD* new_field(void* x, void (*func)(void), void (*freeFunc)(void*), char* fie
     } else {
         F->free_func = freeFunc;
     }
+    F->x = x;
     strcpy(F->field_name, fieldName);
     strcpy(F->field_string, fieldString);
     F->position = -1;
     return F;
 }
 
-void set_field_string(FIELD* F,char* fieldString){
-    if(!F)
+void set_field_string(FIELD* F, char* fieldString) {
+    if (!F)
         return;
     strcpy(F->field_string, fieldString);
 }
 
-FIELD* get_f(COLUMN* C,int index){
+FIELD* get_f(COLUMN* C, int index) {
     FIELD* curr = C->first;
     int i = 0;
     while (curr && i != index) {
@@ -378,48 +400,52 @@ FIELD* get_f(COLUMN* C,int index){
     return curr;
 }
 
-void remove_selected_field(COLUMN* C, FIELD* F){
-    if(!F->is_selected)
+void remove_selected_field(COLUMN* C, FIELD* F) {
+    if (!F->is_selected)
         return;
-    FIELD *p = F->prev_select,*n = F->next_select;
-    if(!p && !n){
+    FIELD *p = F->prev_select, *n = F->next_select;
+    if (!p && !n) {
         C->first_selected = C->last_selected = 0;
-        C->number_of_selected--;
-    }
-    else if(!p){
+    } else if (!p) {
         n->prev_select = NULL;
         C->first_selected = n;
-    }else if(!n){
+    } else if (!n) {
         p->next_select = NULL;
         C->last_selected = p;
-    }else{
+    } else {
         p->next_select = n;
         n->prev_select = p;
     }
+    F->is_selected = 0;
     F->prev_select = F->next_select = NULL;
     C->number_of_selected--;
 }
 
-void remove_field(COLUMN* C, FIELD* F){
-    FIELD *p = F->prev,*n = F->next;
-    if(F->is_selected){
-        remove_selected_field(C,F);
+void remove_field(COLUMN* C, FIELD* F) {
+    FIELD *p = F->prev, *n = F->next;
+    if (F->is_selected) {
+        remove_selected_field(C, F);
     }
-        
-    if(!p && !n){
+
+    if (!p && !n) {
         C->first = C->last = 0;
-        C->number_of_fields--;
-    }
-    else if(!p){
+    } else if (!p) {
         n->prev = NULL;
         C->first = n;
-    }else if(!n){
+    } else if (!n) {
         p->next = NULL;
         C->last = p;
-    }else{
+    } else {
         p->next = n;
         n->prev = p;
     }
+    if (C->first_visible == F)
+        if (n)
+            C->first_visible = n;
+        else if (p)
+            C->first_visible = p;
+        else
+            C->first_visible = NULL;
     free_field(F);
     C->number_of_fields--;
 }
@@ -503,16 +529,16 @@ int cursor_left() {
     return MENUS_OK;
 }
 
-int getPos(COLUMN* C,FIELD* F){
-    if(!C->isCompact)
+int getPos(COLUMN* C, FIELD* F) {
+    if (!C->isCompact)
         return F->position;
     int i = 0;
     FIELD* curr = C->first;
-    while(curr && curr!=F){
+    while (curr && curr != F) {
         curr = curr->next;
         i++;
     }
-    if(!curr)
+    if (!curr)
         return -1;
     return i;
 }
@@ -534,13 +560,12 @@ int cursor_right() {
     return MENUS_OK;
 }
 
-
 int cursor_up() {
     MENU* M = get_active_menu();
     if (!M->cursor_field->prev)
         return MENUS_OK;
     M->cursor_field = M->cursor_field->prev;
-    if (getPos(M->cursor_column,M->cursor_field) < getPos(M->cursor_column,M->cursor_column->first_visible)) {
+    if (getPos(M->cursor_column, M->cursor_field) < getPos(M->cursor_column, M->cursor_column->first_visible)) {
         M->cursor_column->first_visible = M->cursor_field;
     }
     return MENUS_OK;
@@ -551,7 +576,7 @@ int cursor_down() {
     if (!M->cursor_field->next)
         return MENUS_OK;
     M->cursor_field = M->cursor_field->next;
-    while (getPos(M->cursor_column,M->cursor_field) > getPos(M->cursor_column,M->cursor_column->first_visible) + active_prog->column_height - 3) {
+    while (getPos(M->cursor_column, M->cursor_field) > getPos(M->cursor_column, M->cursor_column->first_visible) + active_prog->column_height - 3) {
         M->cursor_column->first_visible = M->cursor_column->first_visible->next;
     }
     return MENUS_OK;
@@ -646,7 +671,8 @@ void print_title(COLUMN* C, char* s) {
 }
 
 void free_field(FIELD * F) {
-    F->free_func(F->x);
+    if (F->x)
+        F->free_func(F->x);
     free(F);
 }
 
@@ -730,4 +756,8 @@ void input_box(int height, int width, char* title, char* message, char* input) {
     clear();
     refresh();
     print_menu(get_active_menu());
+}
+
+void nothing(void* v) {
+    return;
 }
