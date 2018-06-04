@@ -4,9 +4,8 @@
 #include <stdlib.h>
 
 unsigned char inverse(unsigned char );
-int div_aes(int,int);
-int mul_aes(int,int);
-unsigned char mul_grupa(unsigned char,unsigned char);
+unsigned char mod_aes(int,int);
+unsigned int mul_aes(int,int);
 unsigned int*KeyExpansion(int ,unsigned char *,int);
 
 
@@ -26,7 +25,7 @@ int AddKey(unsigned char **,unsigned int*);
 
 int  Aes_Cipher_Block(unsigned int *,unsigned char* ,unsigned char*,int Nr);
 int  Aes_Decipher_Block(unsigned int*,unsigned char *,unsigned char*,int Nr);
-int  Aes_Decipher_File(char *,char *);
-int  Aes_Cipher_File(char *,char *);
+int  Aes_Decipher_File(char *,char *,int);
+int  Aes_Cipher_File(char *,char *,int);
 #endif // TEST_H_INCLUDED
 
