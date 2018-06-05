@@ -97,14 +97,18 @@ void dodajInfo(char* path,char* newpath)
 
 int Dodaj_ime_i_velicinu(char *ime_fajla,char *ime_dest)
 {
+	int i=0;
 	FILE *ulaz=fopen(ime_fajla,"rb"),*izlaz=fopen(ime_dest,"w");
-    fprintf(izlaz,ime_fajla);
+	while(ime_fajla[i++]!='\0');
+	while(i>=0 && ime_fajla[i]!='\\')i--;
+	i++;
+    fprintf(izlaz,ime_fajla+i);
     fprintf(izlaz,"\n");
     fseek(ulaz,0,SEEK_END);
     fprintf(izlaz,"%ld\n",ftell(ulaz));
     fseek(ulaz, 0, SEEK_SET);
-    fclose(izlaz);
-	fclose(ulaz);
+    fclose(izlaz);  
+	fclose(ulaz);	
 }
 
 void procitajINFO(char *path,char *ime,int *velicina,int imaIV,char *iv,int *pocetakFajla)
