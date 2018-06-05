@@ -4,13 +4,25 @@
 
 //hash je long long i nalazi se na kraju fajla
 
-int stringHash(char *path,char fajlVecImaHash)//potrebno samo citanje iz fajla
+int stringHash(char *path,char fajlVecImaHash)
 {
-    FILE *f=fopen(path,"rb");
-    fseek(f,0,SEEK_END);
-    int lengthOfCypherText=ftell(f)-fajlVecImaHash*(sizeof(long long)),hashVal=0,i;
+    int lengthOfCypherText/*=ftell(f)-fajlVecImaHash*(sizeof(long long))*/,startPosition=0,hashVal=0,i;
     char c=0;
-    rewind(f);
+
+        char *tmp=(char*)malloc(128*sizeof(char)),*tmp2=(char*)malloc(128*sizeof(char));
+        procitajINFO(path,tmp,&lengthOfCypherText,0,tmp2,&startPosition);
+        free(tmp);
+        free(tmp2);
+
+    FILE *f=fopen(path,"rb");
+
+        fseek(f,0,SEEK_END);
+        lengthOfCypherText=ftell(f)-fajlVecImaHash*sizeof(long long)-startPosition;
+
+    //rewind(f);
+	fseek(f,startPosition,SEEK_SET);
+	//printf("startujem na: %d\n",startPosition);
+	//printf("duzina je: %d\n",lengthOfCypherText);
 	for (i=0;i<lengthOfCypherText;i++)
     {
         fread(&c,sizeof(char),1,f);
@@ -25,7 +37,7 @@ int stringHash(char *path,char fajlVecImaHash)//potrebno samo citanje iz fajla
 	return hashVal;
 }
 
-long long mojHash(char *path,char fajlVecImaHash,char *kljuc,char duzinaKljuca,int metod)//treba se dogovoriti koji metod prosledjuje koju brojku
+long long mojHash(char *path,char fajlVecImaHash,char *kljuc,char duzinaKljuca,int metod)
 {
     long long hes=0;
     int i=0,j;
@@ -43,7 +55,7 @@ long long mojHash(char *path,char fajlVecImaHash,char *kljuc,char duzinaKljuca,i
     return(hes);
 }
 
-long long procitajHash(char *path)//potrebno samo citanje iz fajla
+long long procitajHash(char *path)
 {
     FILE *f=fopen(path,"rb");
     fseek(f,-sizeof(long long),SEEK_END);
@@ -53,7 +65,7 @@ long long procitajHash(char *path)//potrebno samo citanje iz fajla
     return(ll);
 }
 
-void upisiHash(char *path,long long hes)//potrebno samo pisanje u fajl
+void upisiHash(char *path,long long hes)
 {
     FILE *f=fopen(path,"ab");
     //fseek(f,0,SEEK_END);
@@ -68,4 +80,48 @@ int isGood(char *path,char *kljuc,char duzinaKljuca,int metod)
     if (target==pokusaj)
         return(1);
     return(0);
+}
+
+/*  nepotrebno?
+void dodajInfo(char* path,char* newpath)
+{
+    FILE *f=fopen(path,"rb"),*newf=fopen(newpath,"wb");
+    char len=strlen(path),i;
+    fwrite(&len,sizeof(char),1,newf);
+    for (i=0;i<len;i++)
+        fwrite(path,sizeof(char),len,newf);
+    fseek(f,0,SEEK_END);
+
+}*/
+
+
+int Dodaj_ime_i_velicinu(char *ime_fajla,char *ime_dest)
+{
+	FILE *ulaz=fopen(ime_fajla,"rb"),*izlaz=fopen(ime_dest,"w");
+    fprintf(izlaz,ime_fajla);
+    fprintf(izlaz,"\n");
+    fseek(ulaz,0,SEEK_END);
+    fprintf(izlaz,"%ld\n",ftell(ulaz));
+    fseek(ulaz, 0, SEEK_SET);
+    fclose(izlaz);
+	fclose(ulaz);
+}
+
+void procitajINFO(char *path,char *ime,int *velicina,int imaIV,char *iv,int *pocetakFajla)
+{
+    FILE *f=fopen(path,"r");
+    char i,*tmpchar=(char*)calloc(128,sizeof(char));
+    //ime=(char*)calloc(128,sizeof(char));
+    fscanf(f,"%s %s",ime,tmpchar);
+    *velicina=atoi(tmpchar);
+    *pocetakFajla=strlen(ime)+strlen(tmpchar)+4;
+    if (imaIV)
+    {
+        //iv=(char*)calloc(8,sizeof(char));
+        for (i=0;i<8;i++)
+            fscanf(f,"%c",iv+i);
+        *pocetakFajla+=8;
+    }
+    free(tmpchar);
+    fclose(f);
 }
