@@ -109,6 +109,7 @@ int Dodaj_ime_i_velicinu(char *ime_fajla,char *ime_dest)
 
 void procitajINFO(char *path,char *ime,int *velicina,int imaIV,char *iv,int *pocetakFajla)
 {
+    return;
     FILE *f=fopen(path,"r");
     char i,*tmpchar=(char*)calloc(128,sizeof(char));
     //ime=(char*)calloc(128,sizeof(char));
