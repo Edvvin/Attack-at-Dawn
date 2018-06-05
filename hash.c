@@ -61,3 +61,11 @@ void upisiHash(char *path,long long hes)//potrebno samo pisanje u fajl
     //printf("succ = %d\n",succ);
     fclose(f);
 }
+
+int isGood(char *path,char *kljuc,char duzinaKljuca,int metod)
+{
+    long long target=procitajHash(path),pokusaj=mojHash(path,1,kljuc,duzinaKljuca,metod);
+    if (target==pokusaj)
+        return(1);
+    return(0);
+}
