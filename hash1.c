@@ -63,10 +63,10 @@ void upisiHash(char *path,long long hes)//potrebno samo pisanje u fajl
     fclose(f);
 }
 
-int Dodaj_ime_i_veliinu(char *ime_fajla,char *ime_dest)
+int Dodaj_ime_i_veliinu1(char *ime_fajla,char *ime_dest,int j)
 {
 	FILE *ulaz=fopen(ime_fajla,"rb"),*izlaz=fopen(ime_dest,"w");
-    fprintf(izlaz,ime_fajla);
+    fprintf(izlaz,ime_fajla+j);
     fprintf(izlaz,"\n");
     fseek(ulaz,0,SEEK_END);
     fprintf(izlaz,"%ld\n",ftell(ulaz));
