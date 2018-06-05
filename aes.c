@@ -451,7 +451,6 @@ int  Aes_Cipher_File(char *ime_fajla,char *key_name,int Nk,char *path)
 	}
 	else
 	{
-		printf("Losa duzina");
 		return -1;
 	}
 	
@@ -477,7 +476,7 @@ int  Aes_Cipher_File(char *ime_fajla,char *key_name,int Nk,char *path)
 	
 	memcpy(ime_dest+i+velicina_path,ekstenzija,strlen(ekstenzija)+1);
 	ime_dest=ime_provera(ime_dest);
-	Dodaj_ime_i_veliinu1(ime_fajla,ime_dest,j);
+	Dodaj_ime_i_velicinu(ime_fajla,ime_dest);
 	
 	FILE *ulaz=fopen(ime_fajla,"rb"),*izlaz;
     izlaz=fopen(ime_dest,"ab"); 
@@ -551,7 +550,6 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
 	}
 	else
 	{
-		printf("Losa duzina");
 		return -1;
 	}
     long long hash_file=procitajHash(ime_ciphera),hash_kreiran=mojHash(ime_ciphera,1,key_name,Nk*4,mod);
@@ -640,7 +638,15 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
     fclose(izlaz);   
 	return 0;
 }
-
+int main()
+{
+    unsigned char molim5[33]={0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0xf,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,
+    0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,'\0'};
+        unsigned char molim[16]={0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0xf};
+        unsigned char ha[16]={};
+	Aes_Cipher_File("C:\\Users\\jovan98\\Desktop\\PROJEKAT PP2\\testtxt.txt",ha,4,NULL);
+	Aes_Decipher_File("C:\\Users\\jovan98\\Desktop\\PROJEKAT PP2\\testtxt_aes.txt",ha,4,NULL);
+}
 
 /*
     unsigned char test[4][4]={{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,16}};
