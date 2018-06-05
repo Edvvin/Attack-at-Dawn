@@ -3,8 +3,8 @@
 #include <string.h>
 #include "aes.h"
 #include "time.h"
-#include "hash.h"
-#include "hash.c"
+#include "hash1.h"
+#include "hash1.c"
 unsigned char Inverse_S_box[256]={82,9,106,213,48,54,165,56,191,64,163,158,129,243,215,251,124,227,57,130,155,47,255,135,52,142,67,68,196,222,233,203,84,123,148,50,166,194,35,61,238,76,149,11,66,250,195,78,8,46,161,102,40,217,36,178,118,91,162,73,109,139,209,37,114,248,246,100,134,104,152,22,212,164,92,204,93,101,182,146,108,112,72,80,253,237,185,218,94,21,70,87,167,141,157,132,144,216,171,0,140,188,211,10,247,228,88,5,184,179,69,6,208,44,30,143,202,63,15,2,193,175,189,3,1,19,138,107,58,145,17,65,79,103,220,234,151,242,207,206,240,180,230,115,150,172,116,34,231,173,53,133,226,249,55,232,28,117,223,110,71,241,26,113,29,41,197,137,111,183,98,14,170,24,190,27,252,86,62,75,198,210,121,32,154,219,192,254,120,205,90,244,31,221,168,51,136,7,199,49,177,18,16,89,39,128,236,95,96,81,127,169,25,181,74,13,45,229,122,159,147,201,156,239,160,224,59,77,174,42,245,176,200,235,187,60,131,83,153,97,23,43,4,126,186,119,214,38,225,105,20,99,85,33,12,125};
 
 unsigned char S_box[256]={99,124,119,123,242,107,111,197,48,1,103,43,254,215,171,118,202,130,201,125,250,89,71,240,173,212,162,175,156,164,114,192,183,253,147,38,54,63,247,204,52,165,229,241,113,216,49,21,4,199,35,195,24,150,5,154,7,18,128,226,235,39,178,117,9,131,44,26,27,110,90,160,82,59,214,179,41,227,47,132,83,209,0,237,32,252,177,91,106,203,190,57,74,76,88,207,208,239,170,251,67,77,51,133,69,249,2,127,80,60,159,168,81,163,64,143,146,157,56,245,188,182,218,33,16,255,243,210,205,12,19,236,95,151,68,23,196,167,126,61,100,93,25,115,96,129,79,220,34,42,144,136,70,238,184,20,222,94,11,219,224,50,58,10,73,6,36,92,194,211,172,98,145,149,228,121,231,200,55,109,141,213,78,169,108,86,244,234,101,122,174,8,186,120,37,46,28,166,180,198,232,221,116,31,75,189,139,138,112,62,181,102,72,3,246,14,97,53,87,185,134,193,29,158,225,248,152,17,105,217,142,148,155,30,135,233,206,85,40,223,140,161,137,13,191,230,66,104,65,153,45,15,176,84,187,22};
@@ -428,9 +428,9 @@ char *ime_provera(char *s)
 int  Aes_Cipher_File(char *ime_fajla,char *key_name,int Nk,char *path)
 {
 	
-	unsigned char*key,rec[16],output[16],ulaz_ispis[8*1024];
+	unsigned char rec[16],output[16],ulaz_ispis[8*1024];
 	char *ime_dest,ekstenzija[]="_aes.txt";
-	int i=0,Nr,velicina_path=0,mod; 
+	int i=0,j=0,Nr,velicina_path=0,mod; 
 	while(ime_fajla[i]!='\0')i++;
 	unsigned int broj_procitanih;
 	unsigned int *word;
@@ -444,41 +444,47 @@ int  Aes_Cipher_File(char *ime_fajla,char *key_name,int Nk,char *path)
         Nr=12;
         mod=47;
     }
-    else 
+    else if(Nk==8)
     {
-    	Nr=14;
-    	mod=61;
+		Nr=14;
+    	mod=61;    	
 	}
-	while(ime_fajla[i]!='.')i--;
+	else
+	{
+		printf("Losa duzina");
+		return -1;
+	}
 	
+	while(ime_fajla[i]!='.')i--;
+	j=i;
+	while(j>=0 &&ime_fajla[j]!='\\')j--;
+	j++;
+	i-=j;	
+
 	if(path!=NULL)
 	{
 		while(path[velicina_path++]!='\0');
-		velicina_path+=1;
 	}
-	
-	
+
 	ime_dest=(char*)malloc((i+9+velicina_path)*sizeof(char));
+
 	if(path!=NULL)
 	{
-		memcpy(ime_dest,path,velicina_path-2);
-		memcpy(ime_dest+velicina_path-2,"\\\\",2);
+		memcpy(ime_dest,path,velicina_path-1);
+		memcpy(ime_dest+velicina_path-1,"\\",1);
 	}
-	memcpy(ime_dest+velicina_path,ime_fajla,i);
-	memcpy(ime_dest+i+velicina_path,ekstenzija,strlen(ekstenzija)+1);
-			
-	ime_dest=ime_provera(ime_dest);
+	memcpy(ime_dest+velicina_path,ime_fajla+j,i);
 	
-	Dodaj_ime_i_veliinu(ime_fajla,ime_dest);
+	memcpy(ime_dest+i+velicina_path,ekstenzija,strlen(ekstenzija)+1);
+	ime_dest=ime_provera(ime_dest);
+	Dodaj_ime_i_veliinu1(ime_fajla,ime_dest,j);
 	
 	FILE *ulaz=fopen(ime_fajla,"rb"),*izlaz;
-    izlaz=fopen(ime_dest,"ab");
-   
+    izlaz=fopen(ime_dest,"ab"); 
     
-    key=(char*)calloc(4*Nk,sizeof(char));
 
-    memcpy(key,key_name,strlen(key_name));
-    word=KeyExpansion(Nk,key,Nr);
+    word=KeyExpansion(Nk,key_name,Nr);
+    
     i=0;
     broj_procitanih=fread(ulaz_ispis,1,8*1024,ulaz);
     while(broj_procitanih!=0)
@@ -512,9 +518,8 @@ int  Aes_Cipher_File(char *ime_fajla,char *key_name,int Nk,char *path)
     free(word);
     
     
-    upisiHash(ime_dest,mojHash(ime_dest,0,key,Nk*4,mod));
+    upisiHash(ime_dest,mojHash(ime_dest,0,key_name,Nk*4,mod));
     free(ime_dest);
-    free(key);
     return 0;
 }
 
@@ -523,13 +528,12 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
 {
 	
 	char *pomocs,*ime_fajla=NULL;//s-ime fajla bez ekstenzije,pomocs-ako se promeni adresa imena
-    unsigned char c,rec[16],Nr,ulaz_ispis[8*1024],*key,output[16];;
-    int n=0,i,velicina_path=0,mod;
+    unsigned char c,rec[16],Nr,ulaz_ispis[8*1024],output[16];;
+    int n=0,i,j=0,velicina_path=0,mod;
     unsigned int *word;
     unsigned long long velicina_fajla=0,velicina_fajla_pad,broj_procitanih;
     
-    key=(char*)calloc(4*Nk,sizeof(char));
-    memcpy(key,key_name,strlen(key_name));
+
     if(Nk==4)
     {
         Nr=10;
@@ -540,12 +544,17 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
         Nr=12;
         mod=47;
     }
-    else 
+    else if(Nk==8)
     {
 		Nr=14;
     	mod=61;    	
 	}
-    long long hash_file=procitajHash(ime_ciphera),hash_kreiran=mojHash(ime_ciphera,1,key,Nk*4,mod);
+	else
+	{
+		printf("Losa duzina");
+		return -1;
+	}
+    long long hash_file=procitajHash(ime_ciphera),hash_kreiran=mojHash(ime_ciphera,1,key_name,Nk*4,mod);
 	if(hash_file!=hash_kreiran)
     {
     	return 1;
@@ -556,12 +565,11 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
 	if(path!=NULL)
 	{
 		while(path[velicina_path++]!='\0');
-		velicina_path+=1;
 		n=velicina_path;
 		pomocs=(char*)malloc((n)*(sizeof(char)));
 		ime_fajla=pomocs;
-		memcpy(ime_fajla,path,velicina_path-2);
-		memcpy(ime_fajla+velicina_path-2,"\\\\",2);		
+		memcpy(ime_fajla,path,velicina_path-1);
+		memcpy(ime_fajla+velicina_path-1,"\\",1);		
 	}    
 	
     while((fread(&c,1,1,ulaz)) && c!='\n')
@@ -578,11 +586,10 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
 	pomocs=(char*)realloc(ime_fajla,(++n)*sizeof(char));
     ime_fajla=pomocs;
     ime_fajla[n-1]='\0';
-	
-	
     ime_fajla=ime_provera(ime_fajla);
+    
     izlaz=fopen(ime_fajla,"wb");  
-    word=KeyExpansion(Nk,key,Nr);
+    word=KeyExpansion(Nk,key_name,Nr);
 
 //Trazenje velicine_fajla
     while((fread(&c,1,1,ulaz)) && c!='\n')
@@ -633,11 +640,7 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
     fclose(izlaz);   
 	return 0;
 }
-int main()
-{
-	Aes_Cipher_File("slika.jpg","Thats my Kung Fu",4,"C:\\Users\\jovan98\\Desktop\\PROJEKAT PP2");
-	Aes_Decipher_File("C:\\Users\\jovan98\\Desktop\\PROJEKAT PP2\\slika_aes174094.txt","Thats my Kung Fu",4,"C:\\Users\\jovan98\\Desktop\\PROJEKAT PP2");
-}
+
 
 /*
     unsigned char test[4][4]={{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,16}};
