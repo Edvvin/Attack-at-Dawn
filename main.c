@@ -5,8 +5,8 @@
 #include "DES.h"
 #include "aes.h"
 #include "menus.h"
-#define MAX_KEY_LEN 33
-#define MAX_KEY_NAME_LEN 32
+#define MAX_KEY_LEN 65
+#define MAX_KEY_NAME_LEN 64
 #define READ_BLOCK_SIZE 10
 #define FOR_ALL_SELECTED(C,F,temp) for(F = C->first_selected;F;temp = F->next_select,remove_selected_field(C,F),F=temp,print_menu(get_active_menu()))
 
@@ -52,9 +52,14 @@ typedef struct couple {
 } COUPLE;
 
 int main(int argc, char** argv) {
+    if(argc > 1){
+        start_cmd_mode(argc-1,argv+1);
+    }
+    else{
     load();
     run_prog(get_menu("main_menu"));
     end_prog();
+    }
 }
 
 void load() {
@@ -218,10 +223,19 @@ void km_add_func() {
     COLUMN* C = get_column(get_active_menu(), "km_keys");
     char key[MAX_INPUT_LEN + 1];
     while (1) {
-        input_box(10, 52, "Input key", "Input key as a series of characters,\naccepted lengths are 8, 16, 24 and 32 characters.\n(Leave empty to cancel)", key);
+        input_box(10, 52, "Input key", "Input key as a series of characters,\naccepted lengths are 16, 32, 48 and 64 characters.\n(Leave empty to cancel)", key);
         if (!*key)
             break;
-        if (strlen(key) <= 8 || strlen(key) == 16 || strlen(key) == 24 || strlen(key) == 32) {
+        int len = strlen(key);
+        int i;
+        for(i = 0; i<len;i++){
+            if(!strchr("0123456789ABCDEFabcdef",key[i]))break;
+        }
+        if(i<len){
+            message_box(10,30,"Error","Input must contain only\n hexadecimal digits");
+            continue;
+        }
+        if (len == 16 || len == 32 || len == 48 || len == 64) {
             KEY* K = malloc(sizeof (KEY));
             strcpy(K->key, key);
             K->is_named = 0;
@@ -283,6 +297,8 @@ void km_load_func() {
     char file_name[MAX_INPUT_LEN + 4];
     do {
         input_box(10, 50, "Load", "Input file name", file_name);
+        if(!*file_name)
+            return;
         f = fopen(file_name, "rb");
         if (!f)
             message_box(10, 30, "Error", "Please input valid file name");
@@ -324,6 +340,8 @@ void km_save_func() {
             switch (c) {
                 case '\\':case'/':case'"': case'?': case '<': case '>':case'|':case'*':case':':
                     bad = 1;
+                default:
+                    break;
             }
             if (bad) {
                 message_box(10, 30, "Error", "File name must not contain \\ / \" ? < > | * or :");
@@ -363,7 +381,7 @@ void ed_add_func() {
         if(f){
             fclose(f);
         }else{
-            message_box(10,30,"Error","File with given directory or name not found");
+            message_box(10,30,"Error","File with given directory\nor name not found");
             continue;
         }
         cup->alg = NAA;
@@ -442,32 +460,35 @@ void ed_run_func() {
     COLUMN* algs = get_column(get_active_menu(), "ed_algs");
     FIELD *F = files->first, *p;
     p = F;
+    char* k;
     while (F) {
         F = F->next;
         COUPLE* cup = p->x;
         if (cup->key && cup->alg != NAA) {
             Algorithm a = cup->alg;
             int er = 0;
+            k = hex2key(cup->key->key);
             switch(a){
                 case AES:
-                    er = Aes_Cipher_File(cup->file_name,cup->key->key,(strlen(cup->key->key)/4));
+                    er = Aes_Cipher_File(cup->file_name,k,(strlen(cup->key->key)/2));
                     break;
                 case DES:
-                    er = DES_encrypt_file(cup->file_name,cup->key->key);
+                    er = DES_encrypt_file(cup->file_name,k);
                     break;
                 case TRIPLE_DES:
-                    er = triple_DES_encrypt_file(cup->file_name,cup->key->key);
+                    er = triple_DES_encrypt_file(cup->file_name,k);
                     break;
                 case AES_DECRYPT:
-                    er = Aes_Decipher_File(cup->file_name,cup->key->key,(strlen(cup->key->key)/4));
+                    er = Aes_Decipher_File(cup->file_name,k,(strlen(cup->key->key)/2));
                     break;
                 case DES_DECRYPT:
-                    er = DES_decrypt_file(cup->file_name,cup->key->key);
+                    er = DES_decrypt_file(cup->file_name,k);
                     break;
                 case TRIPLE_DES_DECRYPT:
-                    er = triple_DES_encrypt_file(cup->file_name,cup->key->key);
+                    er = triple_DES_encrypt_file(cup->file_name,k);
                     break;
             }
+            free(k);
             if(!er){
                 remove_field(algs,cup->alg_field);
                 remove_field(keys, cup->key_field);
@@ -513,7 +534,7 @@ void ed_swap() {
 }
 
 Algorithm shift_alg(Algorithm a, int len) {
-    if (len == 8) {
+    if (len == 16) {
         switch (a) {
             case NAA:
                 a = DES;
@@ -524,7 +545,7 @@ Algorithm shift_alg(Algorithm a, int len) {
             case DES_DECRYPT:
                 a = DES;
         }
-    } else if (len == 16) {
+    } else if (len == 32) {
         switch (a) {
             case NAA:
                 a = AES;
@@ -541,7 +562,7 @@ Algorithm shift_alg(Algorithm a, int len) {
             case TRIPLE_DES_DECRYPT:
                 a = AES;
         }
-    } else if (len == 24 || len == 32) {
+    } else if (len == 48 || len == 64) {
         switch (a) {
             case NAA:
                 a = AES;

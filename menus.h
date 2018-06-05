@@ -7,6 +7,7 @@
 #define MAX_NAME_LEN 64
 #define MAX_FIELD_NAME_LEN 8
 #define MAX_SELECT 2000
+#define MAX_FIELD_STRING_LEN 65
 #define MAX_ERROR_MESSAGE_LEN 100
 #define MAX_INPUT_LEN 500
 #define MENUS_ERR 0
@@ -24,7 +25,7 @@ static MENUS_ERROR m_err;
 
 typedef struct field {
     void *x, (*f)(void),(*free_func)(void*);
-    char field_name[MAX_FIELD_NAME_LEN], field_string[32];
+    char field_name[MAX_FIELD_NAME_LEN], field_string[MAX_FIELD_STRING_LEN];
     int is_selected,position;
     struct field *next, *prev,*next_select,*prev_select;
 } FIELD;
@@ -54,6 +55,7 @@ typedef struct prog {
 
 static PROG* active_prog = NULL;
 
+unsigned char* hex2key(char* key);
 int init_prog();
 void set_update(void(*update)(void));
 int run_prog(MENU* startMenu);
