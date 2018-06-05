@@ -430,19 +430,25 @@ int  Aes_Cipher_File(char *ime_fajla,char *key_name,int Nk,char *path)
 	
 	unsigned char*key,rec[16],output[16],ulaz_ispis[8*1024];
 	char *ime_dest,ekstenzija[]="_aes.txt";
-	int i=0,Nr,velicina_path=0; 
+	int i=0,Nr,velicina_path=0,mod; 
 	while(ime_fajla[i]!='\0')i++;
 	unsigned int broj_procitanih;
 	unsigned int *word;
 	if(Nk==4)
     {
         Nr=10;
+        mod=23;
     }
     else if(Nk==6)
     {
         Nr=12;
+        mod=47;
     }
-    else Nr=14;
+    else 
+    {
+    	Nr=14;
+    	mod=61;
+	}
 	while(ime_fajla[i]!='.')i--;
 	
 	if(path!=NULL)
@@ -462,14 +468,10 @@ int  Aes_Cipher_File(char *ime_fajla,char *key_name,int Nk,char *path)
 	memcpy(ime_dest+i+velicina_path,ekstenzija,strlen(ekstenzija)+1);
 			
 	ime_dest=ime_provera(ime_dest);
-	FILE *ulaz=fopen(ime_fajla,"rb");
-    FILE *izlaz=fopen(ime_dest,"w");
-    fprintf(izlaz,ime_fajla);
-    fprintf(izlaz,"\n");
-    fseek(ulaz,0,SEEK_END);
-    fprintf(izlaz,"%ld\n",ftell(ulaz));
-    fseek(ulaz, 0, SEEK_SET);
-    fclose(izlaz);  
+	
+	Dodaj_ime_i_veliinu(ime_fajla,ime_dest);
+	
+	FILE *ulaz=fopen(ime_fajla,"rb"),*izlaz;
     izlaz=fopen(ime_dest,"ab");
    
     
@@ -510,7 +512,7 @@ int  Aes_Cipher_File(char *ime_fajla,char *key_name,int Nk,char *path)
     free(word);
     
     
-    upisiHash(ime_dest,mojHash(ime_dest,0,key,Nk*4,Nk*4+1));
+    upisiHash(ime_dest,mojHash(ime_dest,0,key,Nk*4,mod));
     free(ime_dest);
     free(key);
     return 0;
@@ -522,31 +524,33 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
 	
 	char *pomocs,*ime_fajla=NULL;//s-ime fajla bez ekstenzije,pomocs-ako se promeni adresa imena
     unsigned char c,rec[16],Nr,ulaz_ispis[8*1024],*key,output[16];;
-    int n=0,i,velicina_path=0;
+    int n=0,i,velicina_path=0,mod;
     unsigned int *word;
     unsigned long long velicina_fajla=0,velicina_fajla_pad,broj_procitanih;
     
     key=(char*)calloc(4*Nk,sizeof(char));
     memcpy(key,key_name,strlen(key_name));
-   
-    long long hash_file=procitajHash(ime_ciphera),hash_kreiran=mojHash(ime_ciphera,1,key,Nk*4,Nk*4+1);
-    
-
-	if(hash_file!=hash_kreiran)
-    {
-    	return 1;
-	}
-	
     if(Nk==4)
     {
         Nr=10;
+        mod=23;
     }
     else if(Nk==6)
     {
         Nr=12;
+        mod=47;
     }
-    else Nr=14;
-    
+    else 
+    {
+		Nr=14;
+    	mod=61;    	
+	}
+    long long hash_file=procitajHash(ime_ciphera),hash_kreiran=mojHash(ime_ciphera,1,key,Nk*4,mod);
+	if(hash_file!=hash_kreiran)
+    {
+    	return 1;
+	}   
+	 
 	FILE *ulaz=fopen(ime_ciphera,"rb"),*izlaz;
     
 	if(path!=NULL)
@@ -629,7 +633,11 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
     fclose(izlaz);   
 	return 0;
 }
-
+int main()
+{
+	Aes_Cipher_File("slika.jpg","Thats my Kung Fu",4,"C:\\Users\\jovan98\\Desktop\\PROJEKAT PP2");
+	Aes_Decipher_File("C:\\Users\\jovan98\\Desktop\\PROJEKAT PP2\\slika_aes174094.txt","Thats my Kung Fu",4,"C:\\Users\\jovan98\\Desktop\\PROJEKAT PP2");
+}
 
 /*
     unsigned char test[4][4]={{1,2,3,4},{5,6,7,8},{9,10,11,12},{13,14,15,16}};
