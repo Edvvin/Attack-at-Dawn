@@ -14,6 +14,8 @@
 #define HEADER_WIDTH 0
 #define edvin endwin
 
+
+
 typedef enum menus_error {
     M_ERR_NO_ERROR,M_ERR_NO_INITIALIZED_PROG, M_ERR_NULL_PONITER, M_ERR_OVERFLOW, M_ERR_UNDERFLOW, M_ERR_ALLOC, M_ERR_FIELD_POSITION_FILLED,M_ERR_PROG_ALREADY_RUNNING,M_ERR_PROG_ALREADY_ACTIVE,M_ERR_SCREEN_DIM
 } MENUS_ERROR;
@@ -21,14 +23,14 @@ typedef enum menus_error {
 static MENUS_ERROR m_err;
 
 typedef struct field {
-    void *x, (*f)(void),(*free_func)(struct field*);
+    void *x, (*f)(void),(*free_func)(void*);
     char field_name[MAX_FIELD_NAME_LEN], field_string[32];
     int is_selected,position;
     struct field *next, *prev,*next_select,*prev_select;
 } FIELD;
 
 typedef struct column {
-    int number_of_fields, number_of_selected,width,hasBorder,a_bor,b_bor,is_locked,lock_pos,isCompact;
+    int number_of_fields, number_of_selected,width,hasBorder,a_bor,b_bor,is_locked,lock_pos,isCompact,is_designated;
     WINDOW *win;
     char column_name[MAX_NAME_LEN],column_title[MAX_NAME_LEN];
     FIELD *first, *last, *first_visible,*first_selected,*last_selected;
@@ -38,11 +40,12 @@ typedef struct menu {
     int number_of_columns,start_col;
     COLUMN* columns[MAX_COLUMNS];
     char *column_names[MAX_COLUMNS], menu_name[MAX_NAME_LEN];
-    FIELD* cursor_field;
+    FIELD* cursor_field,*special_field;
     COLUMN* cursor_column;
 } MENU;
 
 typedef struct prog {
+    void (*update)(void);
     int number_of_menus, top, is_stopped,column_height,max_width;
     MENU *menus[MAX_MENUS];
     char *menu_names[MAX_MENUS];
@@ -52,10 +55,13 @@ typedef struct prog {
 static PROG* active_prog = NULL;
 
 int init_prog();
+void set_update(void(*update)(void));
 int run_prog(MENU* startMenu);
 void stop_prog();
 int end_prog();
 MENU* get_active_menu();
+void nothing(void*);
+void nothing2(void);
 
 //Menu related functions
 MENU* get_menu(char* menuName);
@@ -65,7 +71,6 @@ int add_column(MENU* M, COLUMN* C);
 int prev_menu();
 int next_menu(MENU* M);
 void print_menu(MENU* M);
-
 
 //Column related functions
 COLUMN* get_column(MENU* M, char* columnName);
