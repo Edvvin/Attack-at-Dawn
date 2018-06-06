@@ -10,7 +10,7 @@ int stringHash(char *path,char fajlVecImaHash)
     char c=0;
 
         char *tmp=(char*)malloc(128*sizeof(char)),*tmp2=(char*)malloc(128*sizeof(char));
-        procitajINFO(path,tmp,&lengthOfCypherText,0,tmp2,&startPosition);
+        procitajINFO(path,tmp,&lengthOfCypherText,&startPosition);
         free(tmp);
         free(tmp2);
 
@@ -21,7 +21,6 @@ int stringHash(char *path,char fajlVecImaHash)
 
 
 	fseek(f,startPosition,SEEK_SET);
-
 	for (i=0;i<lengthOfCypherText;i++)
     {
         fread(&c,sizeof(char),1,f);
@@ -31,7 +30,6 @@ int stringHash(char *path,char fajlVecImaHash)
 		if (g != 0) hashVal ^= g >> 24;
 		hashVal &= ~g;
 	}
-
 	fclose(f);
 	return hashVal;
 }
@@ -48,7 +46,6 @@ long long mojHash(char *path,char fajlVecImaHash,char *kljuc,char duzinaKljuca,i
         hes+=prosti[2+i/4]*((kljuc[i]<<24)+(kljuc[i+1]<<16)+(kljuc[i+2]<<8)+(kljuc[i+3]));
         i+=4;
     }
-
     return(hes);
 }
 

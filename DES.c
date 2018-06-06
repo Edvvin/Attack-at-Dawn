@@ -284,7 +284,7 @@ void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char d
     if (sifraIfajlImaHash)
     {
         char *tmppath=(char*)calloc(128,sizeof(char));
-        procitajINFO(path,dozvola?(*newpath):tmppath,&OGlength,0,NULL,&startPosition);
+        procitajINFO(path,dozvola?(*newpath):tmppath,&OGlength,&startPosition);
         if (dozvola)
             *newpath=writePath(*newpath,dest);
         free(tmppath);
@@ -392,7 +392,6 @@ int triple_DES_encrypt_file(char* path,char *c,char *dest)
         return(-1);
     fclose(f);
     long long hes;
-
     char *newpath=writePath(path,NULL),*tmppath,i;
     blok k1=konstruktor(c),k2=konstruktor(c+8),*keys1=generatesubkeys(k1),*keys2=generatesubkeys(k2);
     char *josjedanput=(char*)calloc(128,sizeof(char));
@@ -412,7 +411,6 @@ int triple_DES_encrypt_file(char* path,char *c,char *dest)
     DES_file(tmppath,&josjedanput,keys1,0,0,0,NULL);
     hes=mojHash(josjedanput,0,c,16,71);
     upisiHash(josjedanput,hes);
-
 
     remove(newpath);
     remove(tmppath);
@@ -441,7 +439,7 @@ int triple_DES_decrypt_file(char* path,char *c,char *dest)
 
     tmppath=writePath(newpath,NULL);
     int morase;
-    procitajINFO(path,josjedanput,&carapa,0,majstor,&morase);
+    procitajINFO(path,josjedanput,&carapa,&morase);
     f=fopen(tmppath,"w");
     fprintf(f,josjedanput);
     fprintf(f,"\n");
