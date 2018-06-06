@@ -232,22 +232,41 @@ blok DES_decrypt_blok(blok b,blok *keys)
     return(DES_blok(b,keys,1));
 }
 
-char* writePath(char* path)//treba pozvati srand u mainu
+char* writePath(char* path,char* dest)//treba pozvati srand u mainu
 {
-    int len=strlen(path),i=len-1,dodatak,j=0,memind=1;
+    int len=strlen(path);
+    if (dest!=NULL)
+    {
+        int slanina=strlen(dest);
+        if (dest[slanina-1]!='\\')
+        {
+            dest[slanina]='\\';
+            dest[slanina+1]='\0';
+        }
+        len+=strlen(dest);
+    }
+    int i=len-1,dodatak,j=0,memind=1,ajnoresejnivde=0;
     char *newpath=(char*)calloc(len+5,sizeof(char)),*tmppath=(char*)calloc(len+5+5,sizeof(char));
     FILE *f;
     while (path[i]!='.')
         i--;
-    strncpy(newpath,path,i);
-    strcpy(tmppath,path);
+    if (dest)
+    {
+        strcpy(newpath,dest);
+        strncat(newpath,path,i);
+        ajnoresejnivde=strlen(dest);
+    }
+    else
+        strncpy(newpath,path,i);
+    strcpy(tmppath,newpath);
+    strcat(tmppath,path+i);
     while (f=fopen(tmppath,"r"))
     {
         fclose(f);
         dodatak=rand()%10;
-        newpath[i+j++]=dodatak+'0';
-        strncpy(tmppath,newpath,i+j);
-        tmppath[i+j]=0;
+        newpath[ajnoresejnivde+i+j++]=dodatak+'0';
+        strncpy(tmppath,newpath,ajnoresejnivde+i+j);
+        tmppath[ajnoresejnivde+i+j]=0;
         if (newpath[len+memind*5-1]!=0)
         {
             newpath=realloc(newpath,len+(++memind)*5);
@@ -263,7 +282,7 @@ char* writePath(char* path)//treba pozvati srand u mainu
 
 
 // nova verzije, iste brzine kao i stara?! nista nema smisla
-void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char dozvola,char doRemovePadding)     //sifraIfajlImaHash = 0 - enkripcija; 1 - dekripcija
+void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char dozvola,char doRemovePadding,char *dest)     //sifraIfajlImaHash = 0 - enkripcija; 1 - dekripcija
 {
     optimizeCode(fixBugs);
     int i,j,poc,removePadding=8,startPosition=0,textLength;
@@ -278,7 +297,7 @@ void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char d
         char *tmppath=(char*)calloc(128,sizeof(char));
         procitajINFO(path,dozvola?(*newpath):tmppath,&OGlength,0,NULL,&startPosition);
         if (dozvola)
-            *newpath=writePath(*newpath);
+            *newpath=writePath(*newpath,dest);
         free(tmppath);
         if (doRemovePadding)
             removePadding=OGlength%8;
@@ -335,7 +354,7 @@ void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char d
     fclose(newf);
 }
 
-int DES_encrypt_file(char* path,char *c)
+int DES_encrypt_file(char* path,char *c,char *dest)
 {
     FILE *f=fopen(path,"rb");
     if (!f)
@@ -343,12 +362,12 @@ int DES_encrypt_file(char* path,char *c)
     fclose(f);
 
     long long hes;
-    char *newpath=writePath(path),i;
+    char *newpath=writePath(path,dest),i;
 
     Dodaj_ime_i_velicinu(path,newpath);
 
     blok k=konstruktor(c),*keys=generatesubkeys(k);
-    DES_file(path,&newpath,keys,0,0,0);
+    DES_file(path,&newpath,keys,0,0,0,dest);
 
 
     hes=mojHash(newpath,0,c,8,17);
@@ -356,7 +375,7 @@ int DES_encrypt_file(char* path,char *c)
     return(0);
 }
 
-int DES_decrypt_file(char* path,char *c)//vraca 1 ako je kljuc ili metod pogresan
+int DES_decrypt_file(char* path,char *c,char *dest)//vraca 1 ako je kljuc ili metod pogresan
 {
     char *newpath=(char*)calloc(128,sizeof(char)),i;
     FILE *f=fopen(path,"r");
@@ -372,11 +391,11 @@ int DES_decrypt_file(char* path,char *c)//vraca 1 ako je kljuc ili metod pogresa
         //printf("pogresno!\n");
         return(1);
     }
-    DES_file(path,&newpath,keys,1,1,1);
+    DES_file(path,&newpath,keys,1,1,1,dest);
     return(0);
 }
 
-int triple_DES_encrypt_file(char* path,char *c)
+int triple_DES_encrypt_file(char* path,char *c,char *dest)
 {
     long long carapa=5318008;
     FILE *f=fopen(path,"rb");
@@ -384,23 +403,24 @@ int triple_DES_encrypt_file(char* path,char *c)
         return(-1);
     fclose(f);
     long long hes;
-    char *newpath=writePath(path),*tmppath,i;
+
+    char *newpath=writePath(path,NULL),*tmppath,i;
     blok k1=konstruktor(c),k2=konstruktor(c+8),*keys1=generatesubkeys(k1),*keys2=generatesubkeys(k2);
     char *josjedanput=(char*)calloc(128,sizeof(char));
 
 
     Dodaj_ime_i_velicinu(path,newpath);
-    DES_file(path,&newpath,keys1,0,0,0);
+    DES_file(path,&newpath,keys1,0,0,0,NULL);
     upisiHash(newpath,carapa);
 
 
-    tmppath=writePath(newpath);
-    DES_file(newpath,&tmppath,keys2,1,0,0);
+    tmppath=writePath(newpath,NULL);
+    DES_file(newpath,&tmppath,keys2,1,0,0,NULL);
 
 
-    josjedanput=writePath(tmppath);
+    josjedanput=writePath(tmppath,dest);
     Dodaj_ime_i_velicinu(path,josjedanput);
-    DES_file(tmppath,&josjedanput,keys1,0,0,0);
+    DES_file(tmppath,&josjedanput,keys1,0,0,0,NULL);
     hes=mojHash(josjedanput,0,c,16,71);
     upisiHash(josjedanput,hes);
 
@@ -410,7 +430,7 @@ int triple_DES_encrypt_file(char* path,char *c)
     return(0);
 }
 
-int triple_DES_decrypt_file(char* path,char *c)
+int triple_DES_decrypt_file(char* path,char *c,char *dest)
 {
     char *newpath=(char*)calloc(128,sizeof(char)),*tmppath,i,*majstor=(char*)calloc(10,sizeof(char));
     FILE *f=fopen(path,"r");
@@ -426,11 +446,11 @@ int triple_DES_decrypt_file(char* path,char *c)
     char *josjedanput=(char*)calloc(128,sizeof(char));
 
 
-    DES_file(path,&newpath,keys1,1,1,0);
+    DES_file(path,&newpath,keys1,1,1,0,NULL);
 
 
 
-    tmppath=writePath(newpath);
+    tmppath=writePath(newpath,NULL);
     int morase;
     procitajINFO(path,josjedanput,&carapa,0,majstor,&morase);
     f=fopen(tmppath,"w");
@@ -439,12 +459,12 @@ int triple_DES_decrypt_file(char* path,char *c)
     fprintf(f,"%ld\n",carapa);
     fclose(f);
     long long dingDong=procitajHash(path);
-    DES_file(newpath,&tmppath,keys2,0,0,0);
+    DES_file(newpath,&tmppath,keys2,0,0,0,NULL);
     upisiHash(tmppath,dingDong);
 
 
-    josjedanput=writePath(josjedanput);
-    DES_file(tmppath,&josjedanput,keys1,1,0,1);
+    josjedanput=writePath(josjedanput,dest);
+    DES_file(tmppath,&josjedanput,keys1,1,0,1,NULL);
 
 
     remove(newpath);
