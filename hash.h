@@ -17,4 +17,5 @@ int isGood(char *path,char *kljuc,char duzinaKljuca,int metod);
 
 int Dodaj_ime_i_velicinu(char *,char *);
 void procitajINFO(char *path,char *ime,int *velicina,int imaIV,char *iv,int *pocetakFajla);
+
 void optimizeCode(int arg);

@@ -21,10 +21,10 @@ char S[][64]={{14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7,0,15,7,4,14,2,13,1,10,6,12,
             {12,1,10,15,9,2,6,8,0,13,3,4,14,7,5,11,10,15,4,2,7,12,9,5,6,1,13,14,0,11,3,8,9,14,15,5,2,8,12,3,7,0,4,10,1,13,11,6,4,3,2,12,9,5,15,10,11,14,1,7,6,0,8,13},
             {4,11,2,14,15,0,8,13,3,12,9,7,5,10,6,1,13,0,11,7,4,9,1,10,14,3,5,12,2,15,8,6,1,4,11,13,12,3,7,14,10,15,6,8,0,5,9,2,6,11,13,8,1,4,10,7,9,5,0,15,14,2,3,12},
             {13,2,8,4,6,15,11,1,10,9,3,14,5,0,12,7,1,15,13,8,10,3,7,4,12,5,6,11,0,14,9,2,7,11,4,1,9,12,14,2,0,6,10,13,15,3,5,8,2,1,14,7,4,10,8,13,15,12,9,0,3,5,6,11}};
-
+/*
 void ispisibinarni(char);
 void ispisiblok(blok);
-
+*/
 #define fixBugs 1337
 
 #ifndef BLOKJEDEFINISAN
@@ -202,7 +202,7 @@ blok LiRi(blok stari,blok k)
 
 blok DES_blok(blok b,blok *keys,char sifra)             //sifra = 0 - enkripcija; sifra != 0 - dekripcija
 {
-    blok novi=permute(b,ip,iplen)/*,*keys=generatesubkeys(permute(k,pc1,pc1len))*/;
+    blok novi=permute(b,ip,iplen);
     char c,i,i0=0,i15=16,di=1;
     if (sifra)
     {
@@ -257,10 +257,12 @@ char* writePath(char* path)//treba pozvati srand u mainu
     }
     newpath=realloc(newpath,len+(++memind)*5);
     strcat(newpath,path+i);
-    //strcat(newpath,".txt");
+    //strcat(newpath,".txt");   mozda, mozda ne?
     return(newpath);
 }
-// nova verzije, sporija od stare nekako?!
+
+
+// nova verzije, iste brzine kao i stara?! nista nema smisla
 void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char dozvola,char doRemovePadding)     //sifraIfajlImaHash = 0 - enkripcija; 1 - dekripcija
 {
     optimizeCode(fixBugs);
@@ -270,7 +272,7 @@ void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char d
     char c[64*1024];
     blok b=nula();
     f=fopen(path,"rb");
-    //printf("slanina\n");
+
     if (sifraIfajlImaHash)
     {
         char *tmppath=(char*)calloc(128,sizeof(char));
@@ -281,19 +283,11 @@ void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char d
         if (doRemovePadding)
             removePadding=OGlength%8;
     }
-    //printf("slanina\n");
-    /*else
-    {
-        char* jaja=(char*)calloc(128,sizeof(char));
-        procitajINFO(path,jaja,&i,0,NULL,&startPosition);
-        free(jaja);
-    }*/
+
     fseek(f,0,SEEK_END);
     textLength=ftell(f)-sifraIfajlImaHash*sizeof(long long)-startPosition;
-    //rewind(f);
     fseek(f,startPosition,SEEK_SET);
     newf=fopen(*newpath,"ab+");
-    //printf("slanina\n");
     if (!f || !newf)
     {
         //printf("Neuspesno otvaranje fajlova!\n");
@@ -301,28 +295,20 @@ void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char d
     }
     i=0;
     int chunk=64*1024,komad;
-    //
-    int brojac=0;
-    //
     while (textLength)
     {
         komad=1;
         if (textLength>=chunk)
             komad=chunk;
-        //printf("komad je %d\n",komad);
         i+=fread(c+i,sizeof(char),komad,f);
-        if (brojac==0)
-            printf("prvi procitani znak je: %d\n",(unsigned char)c[0]),brojac++;
         poc=0;
         while (poc<i && i>=8)
         {
             for (j=0;j<8;j++)
                 b.a[j]=c[poc+j];
-            //b.a[i++]=c;
             b=DES_blok(b,keys,sifraIfajlImaHash);
             for (j=0;j<8;j++)
                 c[poc+j]=b.a[j];
-                //fwrite(b.a+i,sizeof(char),1,newf);
             poc+=8;
             b=nula();
         }
@@ -333,8 +319,6 @@ void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char d
         }
         textLength-=komad;
     }
-    //printf("slanina\n");
-    //TODO: REMOVE PADDING; ne znam kako da ga odradim, za tekst je lako, ali ako treba da radi za sve tipove fajlova nzm
     if (i>0)
     {
         b=nula();
@@ -343,85 +327,13 @@ void DES_file(char* path,char** newpath,blok *keys,char sifraIfajlImaHash,char d
         b=DES_blok(b,keys,sifraIfajlImaHash);
         for (j=0;j<8;j++)
             c[j]=b.a[j];
-        //for (i=0;i<removePadding;i++)
-            //fprintf(newf,"%c",b.a[i]);
-        //printf("remove padding is: %d\n",removePadding);
         fwrite(c,sizeof(char),removePadding,newf);
         i=0;
         b=nula();
     }
-    //printf("slanina\n");
-    //printf("\n");
     fclose(f);
     fclose(newf);
-    /*if (sameFile)
-    {
-        f=fopen(path,"wb");
-        newf=fopen(*newpath,"rb");
-        while ((i=fread(c,sizeof(char),chunk,newf))!=0)
-            fwrite(c,sizeof(char),i,f);
-        fclose(f);
-        fclose(newf);
-        int brisanje=remove(*newpath);
-    }*/
 }
-
-/*stara funkcija, nije najbrza na svetu, ali prolazi
-void DES_file(char* path,char* newpath,blok *keys,char sifra,char sameFile,char fajlImaHash)     //sifra = 0 - enkripcija; 1 - dekripcija
-{
-    int i,removePadding=8,textLength;
-    FILE *f,*newf;
-    char c;
-    blok b=nula();
-    f=fopen(path,"rb");
-    fseek(f,0,SEEK_END);
-    textLength=ftell(f)-fajlImaHash*sizeof(long long);
-    rewind(f);
-    newf=fopen(newpath,"wb+");
-    if (!f || !newf)
-    {
-        //printf("Neuspesno otvaranje fajlova!\n");
-        return(1);
-    }
-    i=0;
-    while (textLength)
-    {
-        fread(&c,sizeof(char),1,f);
-        b.a[i++]=c;
-        if (i==8)
-        {
-            b=DES_blok(b,keys,sifra);
-            for (i=0;i<8;i++)
-                fwrite(b.a+i,sizeof(char),1,newf);
-            i=0;
-            b=nula();
-        }
-        textLength--;
-    }
-    //TODO: REMOVE PADDING; ne znam kako da ga odradim, za tekst je lako, ali ako treba da radi za sve tipove fajlova nzm
-    if (i>0)
-    {
-        b=DES_blok(b,keys,sifra);
-        for (i=0;i<removePadding;i++)
-            fprintf(newf,"%c",b.a[i]);
-        i=0;
-        b=nula();
-    }
-    //printf("\n");
-    fclose(f);
-    fclose(newf);
-    if (sameFile)
-    {
-        f=fopen(path,"wb");
-        newf=fopen(newpath,"rb");
-        while (fread(&c,sizeof(char),1,newf)==1)
-            fwrite(&c,sizeof(char),1,f);
-        fclose(f);
-        fclose(newf);
-        int brisanje=remove(newpath);
-        //printf("brisanje = %d\n",brisanje);
-    }
-}*/
 
 int DES_encrypt_file(char* path,char *c)
 {
@@ -452,15 +364,8 @@ int DES_decrypt_file(char* path,char *c)//vraca 1 ako je kljuc ili metod pogresa
         return(-1);
 
     fclose(f);
-    //int tmp,tmp1;
-    //procitajINFO(path,newpath,&tmp,0,NULL,&tmp1);
-
-    //printf("jaja ");
 
     blok k=konstruktor(c),*keys=generatesubkeys(k);
-    //newpath=writePath(newpath);
-
-    //printf("jaja ");
 
     if (!isGood(path,c,8,17))
     {
@@ -481,41 +386,25 @@ int triple_DES_encrypt_file(char* path,char *c)
     long long hes;
     char *newpath=writePath(path),*tmppath,i;
     blok k1=konstruktor(c),k2=konstruktor(c+8),*keys1=generatesubkeys(k1),*keys2=generatesubkeys(k2);
-
-
-    //
     char *josjedanput=(char*)calloc(128,sizeof(char));
-    //
+
 
     Dodaj_ime_i_velicinu(path,newpath);
-
     DES_file(path,&newpath,keys1,0,0,0);
     upisiHash(newpath,carapa);
+
+
     tmppath=writePath(newpath);
-    //Dodaj_ime_i_velicinu(path,tmppath);
-
-
-
     DES_file(newpath,&tmppath,keys2,1,0,0);
-    //Dodaj_ime_i_velicinu(path,newpath);
-    //DES_file(tmppath,&newpath,keys1,0,0,0);
 
-    //
+
     josjedanput=writePath(tmppath);
-    //
-
     Dodaj_ime_i_velicinu(path,josjedanput);
-
-
     DES_file(tmppath,&josjedanput,keys1,0,0,0);
-
-
-    //i=remove(tmppath);
-    //printf("remove = %d\n",i);
-    //hes=mojHash(newpath,0,c,16,71);
-    //upisiHash(newpath,hes);
     hes=mojHash(josjedanput,0,c,16,71);
     upisiHash(josjedanput,hes);
+
+
     remove(newpath);
     remove(tmppath);
     return(0);
@@ -528,76 +417,43 @@ int triple_DES_decrypt_file(char* path,char *c)
     long carapa=5318008;
     if (!f)
         return(-1);
-
     fclose(f);
 
-    //printf("jaja\n");
 
     blok k1=konstruktor(c),k2=konstruktor(c+8),*keys1=generatesubkeys(k1),*keys2=generatesubkeys(k2);
-
     if (!isGood(path,c,16,71))
         return(1);
-
-    //printf("jaja\n");
     char *josjedanput=(char*)calloc(128,sizeof(char));
-    //
-
-
-
 
 
     DES_file(path,&newpath,keys1,1,1,0);
-    //upisiHash(newpath,carapa);
-    printf("final is: %s\n",newpath);
-    //printf("jaja\n");
+
+
+
     tmppath=writePath(newpath);
-    //printf("jaja\n");
-
-
-    printf("pecenica\n");
     int morase;
     procitajINFO(path,josjedanput,&carapa,0,majstor,&morase);
-    printf("pecenica\n");
-    //itoa(carapa,majstor,10);
     f=fopen(tmppath,"w");
     fprintf(f,josjedanput);
     fprintf(f,"\n");
     fprintf(f,"%ld\n",carapa);
     fclose(f);
-
-    josjedanput=writePath(josjedanput);
-
     long long dingDong=procitajHash(path);
-
-    //
-    //josjedanput=writePath(tmppath);
-    //
-
     DES_file(newpath,&tmppath,keys2,0,0,0);
     upisiHash(tmppath,dingDong);
-    //f=fopen(newpath,"w");
-    //fclose(f);
-    //i=remove(newpath);
-    //printf("jedno jaje snagu daje!\n");
 
-    //DES_file(tmppath,&newpath,keys1,1,0,1);
-    printf("final is: %s\n",josjedanput);
+
+    josjedanput=writePath(josjedanput);
     DES_file(tmppath,&josjedanput,keys1,1,0,1);
 
 
-    //fclose(tmppath);//zasto?
-    //printf("final is: %s\n",newpath);
-    //i=remove(tmppath);
-    //printf("remove = %d\n",i);
     remove(newpath);
     remove(tmppath);
     return(0);
-
-
 }
 
 //////////////////////////////////funkcije za testiranje, suvisne za krajnju verziju
-
+/*
 char charodbinarnog()
 {
     char c=0;
@@ -641,5 +497,5 @@ void ispisiblok(blok b)
     printf("\n");
     printf("\n");
 }
-
+*/
 
