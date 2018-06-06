@@ -4,7 +4,8 @@
 #include <string.h>
 #include <ctype.h>
 #include "aes.h"
-#include "menus.h"
+#include "DES.h"
+#include "keydecode.h"
 #include <time.h>
 
 void start_cmd_mode(int argc, char** argv);

@@ -2,12 +2,19 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <time.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+#include <wchar.h>
+
 #define MAX_MENUS 20
 #define MAX_COLUMNS 20
-#define MAX_NAME_LEN 64
+#define MAX_NAME_LEN 70
 #define MAX_FIELD_NAME_LEN 8
 #define MAX_SELECT 2000
-#define MAX_FIELD_STRING_LEN 65
+#define MAX_FIELD_STRING_LEN 70
 #define MAX_ERROR_MESSAGE_LEN 100
 #define MAX_INPUT_LEN 500
 #define MENUS_ERR 0
@@ -55,7 +62,6 @@ typedef struct prog {
 
 static PROG* active_prog = NULL;
 
-unsigned char* hex2key(char* key);
 int init_prog();
 void set_update(void(*update)(void));
 int run_prog(MENU* startMenu);

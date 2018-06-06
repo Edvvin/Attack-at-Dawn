@@ -1,5 +1,5 @@
 #include "aadcmd.h"
-#include "DES.h"
+
 #define MAX_MESSAGE_LEN 200
 #define LOAD_BLOCK 20
 
@@ -35,7 +35,7 @@ void aes_cmd(int argc, char** argv, int is_batch, FILE** log_file) {
     int decrypt = 0;
     int is_destination_loaded = 0;
     int files_start = 0;
-    char* dest;
+    char* dest = NULL;
     char msg[200];
     for (int i = 0; i < argc; i++) {
         if (files_start) {
@@ -51,7 +51,7 @@ void aes_cmd(int argc, char** argv, int is_batch, FILE** log_file) {
                 fclose(f);
                 if (decrypt) {
                     unsigned char* k = hex2key(key);
-                    int er = Aes_Decipher_File(argv[i], k, len / 2);
+                    int er = Aes_Decipher_File(argv[i], k, len / 8,dest);
                     free(k);
                     if (er) {
                         sprintf(msg, "file with path: ");
@@ -64,7 +64,7 @@ void aes_cmd(int argc, char** argv, int is_batch, FILE** log_file) {
                 } else {
                     unsigned char* k;
                     k = hex2key(key);
-                    Aes_Cipher_File(argv[i], k, len / 2);
+                    Aes_Cipher_File(argv[i], k, len / 8,dest);
                     free(k);
                 }
             }
@@ -345,7 +345,7 @@ void batch_mode(int argc, char** argv, FILE** log_file) {
             sprintf(msg, "Could not find file %s", argv[i]);
             print_to_log(msg, 1, log_file);
         } else {
-            close(f);
+            fclose(f);
             do_batch(argv[i], log_file);
         }
     }

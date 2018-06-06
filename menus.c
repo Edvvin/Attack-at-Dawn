@@ -1,10 +1,4 @@
 #include "menus.h"
-#include <sys/ioctl.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
-#include <wchar.h>
 
 void nothing2(){
     
@@ -34,6 +28,7 @@ int init_prog() {
     getmaxyx(stdscr, active_prog->column_height, active_prog->max_width);
     noecho();
     cbreak();
+    curs_set(0);
     srand(time(0));
     if (has_colors()) {
         start_color();
@@ -760,28 +755,4 @@ void input_box(int height, int width, char* title, char* message, char* input) {
 
 void nothing(void* v) {
     return;
-}
-
-int hexchar2int(char x){
-    char str[2];
-    str[0] = x;
-    str[1] = '\0';
-    int i;
-    sscanf(str,"%x",&i);
-    return i;
-}
-
-unsigned char* hex2key(char* key){
-    int len = strlen(key);
-    unsigned char* str = malloc(sizeof(unsigned char)*(len+1));
-    int i;
-    for(i = 0;i<len;i+=2){
-        char c = 0;
-        c+=hexchar2int(key[i]);
-        c*=16;
-        c+=hexchar2int(key[i+1]);
-        str[i/2] = c;
-    }
-    str[i/2] = 0;
-    return str;
 }

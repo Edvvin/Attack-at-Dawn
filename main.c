@@ -4,7 +4,10 @@
 #include <ctype.h>
 #include "DES.h"
 #include "aes.h"
+#include "aadcmd.h"
 #include "menus.h"
+#include "hash.h"
+#include "keydecode.h"
 #define MAX_KEY_LEN 65
 #define MAX_KEY_NAME_LEN 64
 #define READ_BLOCK_SIZE 10
@@ -32,6 +35,7 @@ void km_back_func();
 void ed_add_func();
 void ed_remv_func();
 void ed_addf_func();
+void ed_solve_func();
 void ed_run_func();
 void ed_back_func();
 void ed_swap();
@@ -52,13 +56,12 @@ typedef struct couple {
 } COUPLE;
 
 int main(int argc, char** argv) {
-    if(argc > 1){
-        start_cmd_mode(argc-1,argv+1);
-    }
-    else{
-    load();
-    run_prog(get_menu("main_menu"));
-    end_prog();
+    if (argc > 1) {
+        start_cmd_mode(argc - 1, argv + 1);
+    } else {
+        load();
+        run_prog(get_menu("main_menu"));
+        end_prog();
     }
 }
 
@@ -144,6 +147,8 @@ void load() {
     add_field(ed_btns, ed_remv, -1);
     FIELD* ed_addf = new_field(0, ed_addf_func, 0, "ed_addf", "Add from File");
     add_field(ed_btns, ed_addf, -1);
+    FIELD* ed_solve = new_field(0, ed_solve_func, 0, "ed_sol", "Solve");
+    add_field(ed_btns, ed_solve, -1);
     FIELD* ed_run = new_field(0, ed_run_func, 0, "ed_run", "Run");
     add_field(ed_btns, ed_run, -1);
     FIELD* ed_back = new_field(0, ed_back_func, 0, "ed_back", "Back");
@@ -228,11 +233,11 @@ void km_add_func() {
             break;
         int len = strlen(key);
         int i;
-        for(i = 0; i<len;i++){
-            if(!strchr("0123456789ABCDEFabcdef",key[i]))break;
+        for (i = 0; i < len; i++) {
+            if (!strchr("0123456789ABCDEFabcdef", key[i]))break;
         }
-        if(i<len){
-            message_box(10,30,"Error","Input must contain only\n hexadecimal digits");
+        if (i < len) {
+            message_box(10, 30, "Error", "Input must contain only\n hexadecimal digits");
             continue;
         }
         if (len == 16 || len == 32 || len == 48 || len == 64) {
@@ -274,7 +279,7 @@ void km_edit_func() {
 
     FOR_ALL_SELECTED(C, F, temp) {
         char str[33];
-        sprintf(str,"Type in which name you would like to associate\nwith the key:\n%s",((KEY*) F->x)->key);
+        sprintf(str, "Type in which name you would like to associate\nwith the key:\n%s", ((KEY*) F->x)->key);
         input_box(15, 52, "Name", str, name);
         if (!*name)
             break;
@@ -297,11 +302,11 @@ void km_load_func() {
     char file_name[MAX_INPUT_LEN + 4];
     do {
         input_box(10, 50, "Load", "Input file name", file_name);
-        if(!*file_name)
+        if (!*file_name)
             return;
         f = fopen(file_name, "rb");
         if (!f)
-            message_box(10, 30, "Error", "Please input valid file name");
+            message_box(10, 30, "Error", "Please input valid \nfile name");
     } while (!f);
     MENU* M = get_active_menu();
     COLUMN* CF = get_column(M, "km_file_keys");
@@ -371,17 +376,17 @@ void ed_add_func() {
     COLUMN* algs = get_column(get_active_menu(), "ed_algs");
 
     COUPLE* cup = malloc(sizeof (COUPLE));
-    while(1){
+    while (1) {
         input_box(10, 50, "Load File", "Input file name or directory", cup->file_name);
-        if(!*cup->file_name){
+        if (!*cup->file_name) {
             free(cup);
             return;
         }
-        FILE* f = fopen(cup->file_name,"r");
-        if(f){
+        FILE* f = fopen(cup->file_name, "r");
+        if (f) {
             fclose(f);
-        }else{
-            message_box(10,30,"Error","File with given directory\nor name not found");
+        } else {
+            message_box(10, 30, "Error", "File with given directory\nor name not found");
             continue;
         }
         cup->alg = NAA;
@@ -393,7 +398,7 @@ void ed_add_func() {
         cup->alg_field = new_field(cup, ed_pick_alg, nothing, "", alg2string(cup->alg));
         add_field(algs, cup->alg_field, -1);
         print_menu(get_active_menu());
-        cup = malloc(sizeof(COUPLE));
+        cup = malloc(sizeof (COUPLE));
     }
 }
 
@@ -423,7 +428,7 @@ void ed_addf_func() {
     char file_name[MAX_INPUT_LEN + 4];
     do {
         input_box(10, 50, "Load", "Input file name", file_name);
-        if(!*file_name)
+        if (!*file_name)
             return;
         f = fopen(file_name, "r");
         if (!f)
@@ -437,17 +442,22 @@ void ed_addf_func() {
     while (1) {
         int n = 0, temp;
         COUPLE* cup = calloc(1, sizeof (COUPLE));
-        while (temp = fscanf(f, "%c", &c), c != '\n' && temp != EOF) {
+        while (temp = fscanf(f, "%c", &c), c != '\n' && c != '\r' && temp != EOF) {
             cup->file_name[n++] = c;
         }
         cup->file_name[n] = '\0';
-
-        cup->file_field = new_field(cup, 0, 0, "", cup->file_name);
-        add_field(files, cup->file_field, -1);
-        cup->key_field = new_field(cup, ed_swap, nothing, "", "...");
-        add_field(keys, cup->key_field, -1);
-        cup->alg_field = new_field(cup, ed_pick_alg, nothing, "", alg2string(cup->alg));
-        add_field(algs, cup->alg_field, -1);
+        FILE* check = fopen(cup->file_name, "r");
+        if (check) {
+            fclose(check);
+            cup->file_field = new_field(cup, 0, 0, "", cup->file_name);
+            add_field(files, cup->file_field, -1);
+            cup->key_field = new_field(cup, ed_swap, nothing, "", "...");
+            add_field(keys, cup->key_field, -1);
+            cup->alg_field = new_field(cup, ed_pick_alg, nothing, "", alg2string(cup->alg));
+            add_field(algs, cup->alg_field, -1);
+        } else {
+            free(cup);
+        }
         if (temp == EOF)
             break;
     }
@@ -468,33 +478,33 @@ void ed_run_func() {
             Algorithm a = cup->alg;
             int er = 0;
             k = hex2key(cup->key->key);
-            switch(a){
+            switch (a) {
                 case AES:
-                    er = Aes_Cipher_File(cup->file_name,k,(strlen(cup->key->key)/2));
+                    er = Aes_Cipher_File(cup->file_name, k, (strlen(cup->key->key) / 8), NULL);
                     break;
                 case DES:
-                    er = DES_encrypt_file(cup->file_name,k);
+                    er = DES_encrypt_file(cup->file_name, k);
                     break;
                 case TRIPLE_DES:
-                    er = triple_DES_encrypt_file(cup->file_name,k);
+                    er = triple_DES_encrypt_file(cup->file_name, k);
                     break;
                 case AES_DECRYPT:
-                    er = Aes_Decipher_File(cup->file_name,k,(strlen(cup->key->key)/2));
+                    er = Aes_Decipher_File(cup->file_name, k, (strlen(cup->key->key) / 8), NULL);
                     break;
                 case DES_DECRYPT:
-                    er = DES_decrypt_file(cup->file_name,k);
+                    er = DES_decrypt_file(cup->file_name, k);
                     break;
                 case TRIPLE_DES_DECRYPT:
-                    er = triple_DES_encrypt_file(cup->file_name,k);
+                    er = triple_DES_encrypt_file(cup->file_name, k);
                     break;
             }
             free(k);
-            if(!er){
-                remove_field(algs,cup->alg_field);
+            if (!er) {
+                remove_field(algs, cup->alg_field);
                 remove_field(keys, cup->key_field);
                 remove_field(files, p);
             }
-            
+
         }
         p = F;
     }
@@ -618,26 +628,77 @@ void aux_choose() {
     set_field_string(cup->alg_field, alg2string(cup->alg));
     prev_menu();
 }
-void update(){
+
+void update() {
     MENU* M = get_active_menu();
-    COLUMN *CF = get_column(M,"ed_files");
-    if((!strcmp(M->menu_name,"enc_dec") || !strcmp(M->menu_name,"enc_dec_hidden"))&&CF->first_visible){
+    COLUMN *CF = get_column(M, "ed_files");
+    if ((!strcmp(M->menu_name, "enc_dec") || !strcmp(M->menu_name, "enc_dec_hidden")) && CF->first_visible) {
         M = get_menu("enc_dec");
         MENU* A = get_active_menu();
-        COLUMN *CK = get_column(M,"ed_keys");
-        COLUMN *CA = get_column(M,"ed_algs");
-        if(A->cursor_column == CF){
+        COLUMN *CK = get_column(M, "ed_keys");
+        COLUMN *CA = get_column(M, "ed_algs");
+        if (A->cursor_column == CF) {
             COUPLE* cup = CF->first_visible->x;
             CK->first_visible = cup->key_field;
             CA->first_visible = cup->alg_field;
-        }else if(A->cursor_column == CK){
+        } else if (A->cursor_column == CK) {
             COUPLE* cup = CK->first_visible->x;
             CF->first_visible = cup->file_field;
             CA->first_visible = cup->alg_field;
-        }else if(A->cursor_column == CA){
+        } else if (A->cursor_column == CA) {
             COUPLE* cup = CA->first_visible->x;
             CK->first_visible = cup->key_field;
             CF->first_visible = cup->file_field;
         }
+    }
+}
+
+void ed_solve_func() {
+    MENU* km = get_menu("key_manager");
+    MENU* ed = get_menu("enc_dec");
+    COLUMN* keys = get_column(km, "km_keys");
+    COLUMN* files = get_column(ed, "ed_files");
+    FIELD* F = files->first;
+    while (F) {
+        FIELD* K = keys->first;
+        COUPLE* cup = F->x;
+        while (K) {
+            KEY* k = K->x;
+            unsigned char* kk = hex2key(k->key);
+            if (isGood(cup->file_name, kk, strlen(k->key) / 2, 17)) {
+                cup->key = k;
+                cup->alg = DES_DECRYPT;
+                set_field_string(cup->key_field, cup->key->is_named ? cup->key->name : cup->key->key);
+                set_field_string(cup->alg_field, alg2string(cup->alg));
+                break;
+            } else if (isGood(cup->file_name, kk, strlen(k->key) / 2, 71)) {
+                cup->key = k;
+                cup->alg = TRIPLE_DES_DECRYPT;
+                set_field_string(cup->key_field, cup->key->is_named ? cup->key->name : cup->key->key);
+                set_field_string(cup->alg_field, alg2string(cup->alg));
+                break;
+            } else if (isGood(cup->file_name, kk, strlen(k->key) / 2, 23)) {
+                cup->key = k;
+                cup->alg = AES_DECRYPT;
+                set_field_string(cup->key_field, cup->key->is_named ? cup->key->name : cup->key->key);
+                set_field_string(cup->alg_field, alg2string(cup->alg));
+                break;
+            } else if (isGood(cup->file_name, kk, strlen(k->key) / 2, 47)) {
+                cup->key = k;
+                cup->alg = AES_DECRYPT;
+                set_field_string(cup->key_field, cup->key->is_named ? cup->key->name : cup->key->key);
+                set_field_string(cup->alg_field, alg2string(cup->alg));
+                break;
+            } else if (isGood(cup->file_name, kk, strlen(k->key) / 2, 61)) {
+                cup->key = k;
+                cup->alg = AES_DECRYPT;
+                set_field_string(cup->key_field, cup->key->is_named ? cup->key->name : cup->key->key);
+                set_field_string(cup->alg_field, alg2string(cup->alg));
+                break;
+            }
+            K = K->next;
+            free(kk);
+        }
+        F = F->next;
     }
 }
