@@ -13,14 +13,6 @@
   *
   */
 
-/**
- * @brief Funkcija za enkripciju vise fajlova jednim kljucem
- * @param[in] pKeyHead Lista kljuceva koje ce funkcija koristiti
- * @param[in,out] pFileHead Fajlovi koje ce funkcija da enkriptuje
- *
- * Nakon izvrsenja funkcije, u strukturi Cvorf ce se nalaziti novo ime fajla kao
- * i status enkripcije.
- */
 
 
 /**

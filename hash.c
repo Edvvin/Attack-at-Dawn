@@ -96,25 +96,14 @@ int Dodaj_ime_i_velicinu(char *ime_fajla,char *ime_dest)
 	fclose(ulaz);
 }
 
-void procitajINFO(char *path,char *ime,int *velicina,int imaIV,char *iv,int *pocetakFajla)
+void procitajINFO(char *path,char *ime,int *velicina,int *pocetakFajla)
 {
     FILE *f=fopen(path,"r");
     char i,*tmpchar=(char*)calloc(128,sizeof(char));
     fscanf(f,"%s %s",ime,tmpchar);
     *velicina=atoi(tmpchar);
     *pocetakFajla=strlen(ime)+strlen(tmpchar)+4;
-    if (imaIV)
-    {
-        //iv=(char*)calloc(8,sizeof(char));             treba ukloniti iv ako ga na kraju ne implementiramo
-        for (i=0;i<8;i++)
-            fscanf(f,"%c",iv+i);
-        *pocetakFajla+=8;
-    }
     free(tmpchar);
     fclose(f);
 }
 
-void optimizeCode(int arg)
-{
-    return;
-}
