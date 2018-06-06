@@ -13,41 +13,163 @@
 #define READ_BLOCK_SIZE 10
 #define FOR_ALL_SELECTED(C,F,temp) for(F = C->first_selected;F;temp = F->next_select,remove_selected_field(C,F),F=temp,print_menu(get_active_menu()))
 
+/**
+ * @file
+ * @author Edvin Maid
+ * @brief Funkcije vezane za ucitavanje GUI elemenata i njihovo koriscenje zajedno sa main funkciojom
+ * 
+ * Sve funkcije potrebne za pozivanje aplikacije sastavljenje i ucitavanje menija
+ *  i pokretanje algoritama dekripcije i enkripcije
+ *
+ */
+
+/**
+ *@brief enum koriscen da razlikuje algoritme koji ce biti primenjivani na neki fajl
+ * 
+ */
 typedef enum algorithm {
     NAA, AES, DES, TRIPLE_DES, AES_DECRYPT, DES_DECRYPT, TRIPLE_DES_DECRYPT
 } Algorithm;
 
+/**
+ * @brief Funkcija koja loaduje sve potrebne elemente i povezuje ih u GUI
+ */
 void load();
+/** 
+ * @brief Funkcija koja se poziva u svakoj iteraciji programske petlje
+ */
 void update();
+
+/**
+ * @brief Konvertuje odgovarajuci enum algoritma u njegov reprezentativni string
+ * @param a algoritam koji se konvertuje
+ * @return niz karaktera reprezentativnog string za algoritam a
+ */
 char* alg2string(Algorithm a);
+
+/**
+ * @brief Funkcija koja definise akciju klika na dugme key manager u glavnom meniju
+ * Funkcija koja definise akciju klika na dugme key manager u glavnom meniju
+ */
 void key_manager_func();
+/**
+ * @brief Funkcija koja definise akciju klika na dugme encryption decryption menu u glavnom meniju
+ * Funkcija koja definise akciju klika na dugme encryption decryption menu u glavnom meniju
+ */
 void enc_dec_func();
+/**
+ * @brief Funkcija koja definise akciju klika na dugme exit u glavnom meniju
+ * Funkcija koja definise akciju klika na dugme exit u glavnom meniju
+ */
 void exit_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme >> u key manager podmeniju
+ * funkcija koja definise akciju klika na dugme >> u key manager podmeniju
+ */
 void km_right_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme << u key manager podmeniju
+ * funkcija koja definise akciju klika na dugme << u key manager podmeniju
+ */
 void km_left_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme add u key manager podmeniju
+ * funkcija koja definise akciju klika na dugme add u key manager podmeniju
+ */
 void km_add_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme remove u key manager podmeniju
+ * funkcija koja definise akciju klika na dugme remove u key manager podmeniju
+ */
 void km_remv_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme name u key manager podmeniju
+ * funkcija koja definise akciju klika na dugme name u key manager podmeniju
+ */
 void km_edit_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme clear u key manager podmeniju
+ * funkcija koja definise akciju klika na dugme clear u key manager podmeniju
+ */
 void km_clear_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme load u key manager podmeniju
+ * funkcija koja definise akciju klika na dugme load u key manager podmeniju
+ */
 void km_load_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme save u key manager podmeniju
+ * funkcija koja definise akciju klika na dugme save u key manager podmeniju
+ */
 void km_save_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme back u key manager podmeniju
+ * funkcija koja definise akciju klika na dugme back u key manager podmeniju
+ */
 void km_back_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme add u encryption decryption podmeniju
+ * funkcija koja definise akciju klika na dugme add u encryption decryption podmeniju
+ */
 void ed_add_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme remove u encryption decryption podmeniju
+ * funkcija koja definise akciju klika na dugme remove u encryption decryption podmeniju
+ */
 void ed_remv_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme add from file u encryption decryption podmeniju
+ * funkcija koja definise akciju klika na dugme add from file u encryption decryption podmeniju
+ */
 void ed_addf_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme solve u encryption decryption podmeniju
+ * funkcija koja definise akciju klika na dugme solve u encryption decryption podmeniju
+ */
 void ed_solve_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme run u encryption decryption podmeniju
+ * funkcija koja definise akciju klika na dugme run u encryption decryption podmeniju
+ */
 void ed_run_func();
+/**
+ * @brief funkcija koja definise akciju klika na dugme back u encryption decryption podmeniju
+ * funkcija koja definise akciju klika na dugme back u encryption decryption podmeniju
+ */
 void ed_back_func();
+/**
+ * @brief funkcija koja definise akciju klika na polje is kolone keys u encryption decryption podmeniju
+ * funkcija koja definise akciju klika na polje is kolone keys u encryption decryption podmeniju
+ */
 void ed_swap();
+/**
+ * @brief funkcija koja definise akciju klika na polje is kolone algorithm u encryption decryption podmeniju
+ * funkcija koja definise akciju klika na polje is kolone algorithm u encryption decryption podmeniju
+ */
 void ed_pick_alg();
+/**
+ * @brief funkcija koja se poziva svaki put kada se pokrene encryption decryption podmeni koja prepisuje kljuceve u skrivenu kolonu
+ * funkcija koja se poziva svaki put kada se pokrene encryption decryption podmeni koja prepisuje kljuceve u skrivenu kolonu
+ */
 void gen_aux();
+/**
+ * @brief funkcija koja definise akciju klika na polje is skrivene kolone keys u encryption decryption podmeniju
+ * funkcija koja definise akciju klika na polje is skrivene kolone keys u encryption decryption podmeniju
+ */
 void aux_choose();
 
+
+/**
+ * @brief struktura koja sluzi za skladistenje kljuca u hexadecimalnoj formi zajedno sa imenom
+ */
 typedef struct key {
     char name[MAX_KEY_NAME_LEN], key[MAX_KEY_LEN];
     int is_named;
 } KEY;
 
+/**
+ * @brief pomocna struktura za povezivanje kolona files keys i algorithm u encryption decryption podmeniju
+ */
 typedef struct couple {
     FIELD *file_field, *key_field, *alg_field;
     char file_name[MAX_INPUT_LEN + 1];
@@ -68,13 +190,17 @@ int main(int argc, char** argv) {
 void load() {
     init_prog();
     set_update(update);
+    int v,wid;
+    
+    getmaxyx(stdscr, v, wid);
+    double w = (double)wid;
     //Main menu
     MENU* main_menu = new_menu("main_menu");
 
-    COLUMN* mm_spacing = new_column("mm_spacing", "", 20);
+    COLUMN* mm_spacing = new_column("mm_spacing", "", (int)(w/80*20));
     add_column(main_menu, mm_spacing);
 
-    COLUMN* mm_btns = new_column("mm_btns", "", 30);
+    COLUMN* mm_btns = new_column("mm_btns", "", (int)(w/80*30));
     add_column(main_menu, mm_btns);
     FIELD* key_manager_btn = new_field(0, key_manager_func, 0, "k_m_btn", "Key Manager");
     add_field(mm_btns, key_manager_btn, 0);
@@ -86,12 +212,12 @@ void load() {
     //key manager
     MENU* key_manager = new_menu("key_manager");
 
-    COLUMN* km_file_keys = new_column("km_file_keys", "File", 20);
+    COLUMN* km_file_keys = new_column("km_file_keys", "File", (int)(w/80*20));
     set_border(km_file_keys, 1, 0, 0);
     compact(km_file_keys);
     add_column(key_manager, km_file_keys);
 
-    COLUMN* km_left_right = new_column("km_left_right", "", 4);
+    COLUMN* km_left_right = new_column("km_left_right", "", (int)(w/80*4));
     lockColumn(km_left_right, 1, 0);
     add_column(key_manager, km_left_right);
     FIELD* km_right_btn = new_field(0, km_right_func, 0, "kmr_btn", ">>");
@@ -99,12 +225,12 @@ void load() {
     FIELD* km_left_btn = new_field(0, km_left_func, 0, "kmr_btn", "<<");
     add_field(km_left_right, km_left_btn, 12);
 
-    COLUMN* km_keys = new_column("km_keys", "Keys", 20);
+    COLUMN* km_keys = new_column("km_keys", "Keys", (int)(w/80*20));
     set_border(km_keys, 1, 0, 0);
     compact(km_keys);
     add_column(key_manager, km_keys);
 
-    COLUMN* km_btns = new_column("km_btns", "", 8);
+    COLUMN* km_btns = new_column("km_btns", "", (int)(w/80*8));
     add_column(key_manager, km_btns);
     FIELD* km_add = new_field(0, km_add_func, 0, "km_add", "Add");
     add_field(km_btns, km_add, -1);
@@ -124,22 +250,22 @@ void load() {
     // enc dec menu
     MENU* enc_dec = new_menu("enc_dec");
 
-    COLUMN* ed_files = new_column("ed_files", "Files", 20);
+    COLUMN* ed_files = new_column("ed_files", "Files", (int)(w/80*20));
     set_border(ed_files, 1, 0, 0);
     compact(ed_files);
     add_column(enc_dec, ed_files);
 
-    COLUMN* ed_keys = new_column("ed_keys", "Keys", 20);
+    COLUMN* ed_keys = new_column("ed_keys", "Keys", (int)(w/80*20));
     set_border(ed_keys, 1, 0, 0);
     compact(ed_keys);
     add_column(enc_dec, ed_keys);
 
-    COLUMN* ed_algs = new_column("ed_algs", "Algorithm", 20);
+    COLUMN* ed_algs = new_column("ed_algs", "Algorithm", (int)(w/80*20));
     set_border(ed_algs, 1, 0, 0);
     compact(ed_algs);
     add_column(enc_dec, ed_algs);
 
-    COLUMN* ed_btns = new_column("ed_btns", "", 15);
+    COLUMN* ed_btns = new_column("ed_btns", "", (int)(w/80*15));
     add_column(enc_dec, ed_btns);
     FIELD* ed_add = new_field(0, ed_add_func, 0, "ed_add", "Add");
     add_field(ed_btns, ed_add, -1);
@@ -158,14 +284,14 @@ void load() {
 
     add_column(enc_dec_hidden, ed_files);
 
-    COLUMN* ed_keys_aux = new_column("ed_keys_aux", "Choose Key", 20);
+    COLUMN* ed_keys_aux = new_column("ed_keys_aux", "Choose Key", (int)(w/80*20));
     set_border(ed_keys_aux, 1, 0, 0);
     compact(ed_keys_aux);
     add_column(enc_dec_hidden, ed_keys_aux);
 
     add_column(enc_dec_hidden, ed_algs);
 
-    COLUMN* edh_btns = new_column("edh_btns", "", 15);
+    COLUMN* edh_btns = new_column("edh_btns", "", (int)(w/80*15));
     FIELD* edh_back = new_field(0, ed_back_func, 0, "edh_back", "Back");
     add_field(edh_btns, edh_back, -1);
     add_column(enc_dec_hidden, edh_btns);

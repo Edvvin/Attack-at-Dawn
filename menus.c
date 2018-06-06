@@ -291,19 +291,18 @@ void select() {
         if (M->cursor_column->number_of_selected == 1) {
             M->cursor_column->last_selected = NULL;
             M->cursor_column->first_selected = NULL;
-            M->cursor_field->next_select = M->cursor_field->prev_select = NULL;
         } else if (!M->cursor_field->next_select) {
+            M->cursor_column->last_selected = M->cursor_column->last_selected->prev_select;
             M->cursor_field->prev_select->next_select = NULL;
-            M->cursor_field->prev_select = NULL;
         } else if (!M->cursor_field->prev_select) {
+            M->cursor_column->first_selected = M->cursor_column->first_selected->next_select;
             M->cursor_field->next_select->prev_select = NULL;
-            M->cursor_field->next_select = NULL;
         } else {
             M->cursor_field->prev_select->next_select = M->cursor_field->next_select;
             M->cursor_field->next_select->prev_select = M->cursor_field->prev_select;
-            M->cursor_field->next_select = NULL;
-            M->cursor_field->prev_select = NULL;
         }
+        M->cursor_field->next_select = NULL;
+        M->cursor_field->prev_select = NULL;
         M->cursor_field->is_selected = 0;
         M->cursor_column->number_of_selected--;
     } else {
