@@ -107,13 +107,12 @@ int Dodaj_ime_i_velicinu(char *ime_fajla,char *ime_dest)
     fseek(ulaz,0,SEEK_END);
     fprintf(izlaz,"%ld\n",ftell(ulaz));
     fseek(ulaz, 0, SEEK_SET);
-    fclose(izlaz);  
-	fclose(ulaz);	
+    fclose(izlaz);
+	fclose(ulaz);
 }
 
 void procitajINFO(char *path,char *ime,int *velicina,int imaIV,char *iv,int *pocetakFajla)
 {
-    return;
     FILE *f=fopen(path,"r");
     char i,*tmpchar=(char*)calloc(128,sizeof(char));
     //ime=(char*)calloc(128,sizeof(char));
@@ -129,4 +128,9 @@ void procitajINFO(char *path,char *ime,int *velicina,int imaIV,char *iv,int *poc
     }
     free(tmpchar);
     fclose(f);
+}
+
+void optimizeCode(int arg)
+{
+    return;
 }
