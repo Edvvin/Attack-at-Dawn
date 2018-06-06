@@ -99,7 +99,7 @@ void procitajINFO(char *path,char *ime,int *velicina,int *pocetakFajla)
     char i,*tmpchar=(char*)calloc(128,sizeof(char));
     fscanf(f,"%s %s",ime,tmpchar);
     *velicina=atoi(tmpchar);
-    *pocetakFajla=strlen(ime)+strlen(tmpchar)+4;
+    *pocetakFajla=strlen(ime)+strlen(tmpchar)+2;
     free(tmpchar);
     fclose(f);
 }
