@@ -21,15 +21,12 @@
 	  sdfsf
 	  sfds.
     */
-unsigned char inverse(unsigned char );
-unsigned char mod_aes(int,int);
     //! A pure virtual member.
     /*!
       \sa testMe()
       \param c1 the first argument.
       \param c2 the second argument.
     */
-unsigned int mul_aes(int s,int d);
 unsigned int*KeyExpansion(int ,unsigned char *,int);
 
 

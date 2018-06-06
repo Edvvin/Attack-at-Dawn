@@ -470,7 +470,9 @@ int  Aes_Cipher_File(char *ime_fajla,char *key_name,int Nk,char *path)
 	if(path!=NULL)
 	{
 		memcpy(ime_dest,path,velicina_path-1);
+		if(path[velicina_path-2]!='\\')
 		memcpy(ime_dest+velicina_path-1,"\\",1);
+		else velicina_path--;
 	}
 	memcpy(ime_dest+velicina_path,ime_fajla+j,i);
 	
@@ -564,10 +566,14 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
 	{
 		while(path[velicina_path++]!='\0');
 		n=velicina_path;
+		if(path[velicina_path-2]=='\\')n--;
 		pomocs=(char*)malloc((n)*(sizeof(char)));
 		ime_fajla=pomocs;
 		memcpy(ime_fajla,path,velicina_path-1);
-		memcpy(ime_fajla+velicina_path-1,"\\",1);		
+		if(path[velicina_path-2]!='\\')
+		memcpy(ime_fajla+velicina_path-1,"\\",1);
+		else velicina_path--;
+		n=velicina_path;	
 	}    
 	
     while((fread(&c,1,1,ulaz)) && c!='\n')
@@ -585,7 +591,7 @@ int  Aes_Decipher_File(char *ime_ciphera,char *key_name,int Nk,char *path)
     ime_fajla=pomocs;
     ime_fajla[n-1]='\0';
     ime_fajla=ime_provera(ime_fajla);
-    
+
     izlaz=fopen(ime_fajla,"wb");  
     word=KeyExpansion(Nk,key_name,Nr);
 
@@ -644,8 +650,8 @@ int main()
     0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,'\0'};
         unsigned char molim[16]={0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0xf};
         unsigned char ha[16]={};
-	Aes_Cipher_File("C:\\Users\\jovan98\\Desktop\\PROJEKAT PP2\\testtxt.txt",ha,4,NULL);
-	Aes_Decipher_File("C:\\Users\\jovan98\\Desktop\\PROJEKAT PP2\\testtxt_aes.txt",ha,4,NULL);
+	Aes_Cipher_File("C:\\Users\\jovan98\\Desktop\\TAND\\testtxt.txt",ha,4,"C:\\Users\\jovan98\\Desktop\\TAND");
+	Aes_Decipher_File("C:\\Users\\jovan98\\Desktop\\TAND\\testtxt_aes.txt",ha,4,"C:\\Users\\jovan98\\Desktop\\TAND\\");
 }
 
 /*
