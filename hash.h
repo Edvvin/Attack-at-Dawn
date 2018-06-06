@@ -83,8 +83,10 @@ void upisiHash(char *path,long long hes);
 int isGood(char *path,char *kljuc,char duzinaKljuca,int metod);
 
 /**
-  * @brief Funkcija radi nesto
-  *
+  * @brief Funkcija kreira fajl na lokaciji <b>ime_dest</b> i dodaje ime i velicinu fajla sa lokacije <b>ime_fajla</b>
+  * @param[in] ime_fajla Lokacija fajla cije se cita ime i velicina
+  * @param[in] ime_dest Lokacija fajla koji se stvara i gde se velicina i ime proslog fajla upisuju u njega
+  *Funkcija prvo kerira fajl na lokaciji <b>ime_dest</b>, a onda upisuje u njega samo ime fajla na lokaciji <ime_fajla> kao i njegovu velicinu.
   */
 int Dodaj_ime_i_velicinu(char *ime_fajla,char *ime_dest);
 
