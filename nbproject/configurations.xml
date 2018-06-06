@@ -4,6 +4,11 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>DES.h</itemPath>
+      <itemPath>aadcmd.h</itemPath>
+      <itemPath>aes.h</itemPath>
+      <itemPath>hash.h</itemPath>
+      <itemPath>keydecode.h</itemPath>
       <itemPath>menus.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -13,6 +18,11 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <itemPath>DES.c</itemPath>
+      <itemPath>aadcmd.c</itemPath>
+      <itemPath>aes.c</itemPath>
+      <itemPath>hash.c</itemPath>
+      <itemPath>keydecode.c</itemPath>
       <itemPath>main.c</itemPath>
       <itemPath>menus.c</itemPath>
     </logicalFolder>
@@ -54,6 +64,26 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="DES.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="DES.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="aadcmd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="aadcmd.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="aes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="aes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="hash.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="hash.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="keydecode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="keydecode.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="menus.c" ex="false" tool="0" flavor2="0">
@@ -71,6 +101,12 @@
         <cTool>
           <developmentMode>5</developmentMode>
           <standard>10</standard>
+          <incDir>
+            <pElem>../../../../../Program Files/NetBeans 8.2/pdcrus36lib</pElem>
+          </incDir>
+          <incFile>
+            <pElem>../../../../../Program Files/NetBeans 8.2/pdcrus36lib/curses.h</pElem>
+          </incFile>
         </cTool>
         <ccTool>
           <developmentMode>5</developmentMode>
@@ -81,7 +117,36 @@
         <asmTool>
           <developmentMode>5</developmentMode>
         </asmTool>
+        <linkerTool>
+          <linkerAddLib>
+            <pElem>"../../../../../Program Files/NetBeans 8.2/pdcrus36lib/wincon"</pElem>
+          </linkerAddLib>
+          <linkerDepDynSerchKind>3</linkerDepDynSerchKind>
+          <linkerLibItems>
+            <linkerLibFileItem>../../../../../Program Files/NetBeans 8.2/pdcrus36lib/wincon/pdcurses.dll</linkerLibFileItem>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
+      <item path="DES.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="DES.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="aadcmd.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="aadcmd.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="aes.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="aes.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="hash.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="hash.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="keydecode.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="keydecode.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="menus.c" ex="false" tool="0" flavor2="0">

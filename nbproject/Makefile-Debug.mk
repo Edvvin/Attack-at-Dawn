@@ -35,6 +35,11 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/DES.o \
+	${OBJECTDIR}/aadcmd.o \
+	${OBJECTDIR}/aes.o \
+	${OBJECTDIR}/hash.o \
+	${OBJECTDIR}/keydecode.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/menus.o
 
@@ -64,6 +69,31 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/attack_at_dawn.exe: ../../../../../Pr
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/attack_at_dawn.exe: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/attack_at_dawn ${OBJECTFILES} ${LDLIBSOPTIONS}
+
+${OBJECTDIR}/DES.o: DES.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -I../../../../../Program\ Files/NetBeans\ 8.2/pdcurs36 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcurs36/wincon -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DES.o DES.c
+
+${OBJECTDIR}/aadcmd.o: aadcmd.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -I../../../../../Program\ Files/NetBeans\ 8.2/pdcurs36 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcurs36/wincon -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/aadcmd.o aadcmd.c
+
+${OBJECTDIR}/aes.o: aes.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -I../../../../../Program\ Files/NetBeans\ 8.2/pdcurs36 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcurs36/wincon -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/aes.o aes.c
+
+${OBJECTDIR}/hash.o: hash.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -I../../../../../Program\ Files/NetBeans\ 8.2/pdcurs36 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcurs36/wincon -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/hash.o hash.c
+
+${OBJECTDIR}/keydecode.o: keydecode.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -g -I../../../../../Program\ Files/NetBeans\ 8.2/pdcurs36 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcurs36/wincon -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/keydecode.o keydecode.c
 
 ${OBJECTDIR}/main.o: main.c
 	${MKDIR} -p ${OBJECTDIR}

@@ -132,7 +132,7 @@ void triple_des_cmd(int argc, char** argv, int is_batch, FILE** log_file) {
     int decrypt = 0;
     int is_destination_loaded = 0;
     int files_start = 0;
-    char* dest;
+    char* dest = NULL;
     char msg[200];
     for (int i = 0; i < argc; i++) {
         if (files_start) {
@@ -148,7 +148,7 @@ void triple_des_cmd(int argc, char** argv, int is_batch, FILE** log_file) {
                 fclose(f);
                 if (decrypt) {
                     char* k = hex2key(key);
-                    int er = triple_DES_decrypt_file(argv[i], k);
+                    int er = triple_DES_decrypt_file(argv[i], k,dest);
                     free(k);
                     if (er) {
                         sprintf(msg, "file with path: ");
@@ -160,7 +160,7 @@ void triple_des_cmd(int argc, char** argv, int is_batch, FILE** log_file) {
                     }
                 } else {
                     char* k = hex2key(key);
-                    triple_DES_encrypt_file(argv[i], k);
+                    triple_DES_encrypt_file(argv[i], k,dest);
                     free(k);
                 }
             }
@@ -228,7 +228,7 @@ void des_cmd(int argc, char** argv, int is_batch, FILE** log_file) {
     int decrypt = 0;
     int is_destination_loaded = 0;
     int files_start = 0;
-    char* dest;
+    char* dest = NULL;
     char msg[200];
     for (int i = 0; i < argc; i++) {
         if (files_start) {
@@ -244,7 +244,7 @@ void des_cmd(int argc, char** argv, int is_batch, FILE** log_file) {
                 fclose(f);
                 if (decrypt) {
                     char* k = hex2key(key);
-                    int er = DES_decrypt_file(argv[i], k);
+                    int er = DES_decrypt_file(argv[i], k,dest);
                     free(k);
                     if (er) {
                         sprintf(msg, "file with path: ");
@@ -256,7 +256,7 @@ void des_cmd(int argc, char** argv, int is_batch, FILE** log_file) {
                     }
                 } else {
                     char* k = hex2key(key);
-                    DES_encrypt_file(argv[i], k);
+                    DES_encrypt_file(argv[i], k,dest);
                     free(k);
                 }
             }

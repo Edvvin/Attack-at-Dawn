@@ -136,6 +136,13 @@ void ed_run_func();
  * @brief funkcija koja definise akciju klika na dugme back u encryption decryption podmeniju
  * funkcija koja definise akciju klika na dugme back u encryption decryption podmeniju
  */
+
+/**
+ * @brief funkcija koja definise akciju klika na dugme Destination u encryption decryption podmeniju
+ * funkcija koja definise akciju klika na dugme Destination u encryption decryption podmeniju
+ */
+void ed_dest_func();
+
 void ed_back_func();
 /**
  * @brief funkcija koja definise akciju klika na polje is kolone keys u encryption decryption podmeniju
@@ -157,7 +164,6 @@ void gen_aux();
  * funkcija koja definise akciju klika na polje is skrivene kolone keys u encryption decryption podmeniju
  */
 void aux_choose();
-
 
 /**
  * @brief struktura koja sluzi za skladistenje kljuca u hexadecimalnoj formi zajedno sa imenom
@@ -190,17 +196,17 @@ int main(int argc, char** argv) {
 void load() {
     init_prog();
     set_update(update);
-    int v,wid;
-    
+    int v, wid;
+
     getmaxyx(stdscr, v, wid);
-    double w = (double)wid;
+    double w = (double) wid;
     //Main menu
     MENU* main_menu = new_menu("main_menu");
 
-    COLUMN* mm_spacing = new_column("mm_spacing", "", (int)(w/80*20));
+    COLUMN* mm_spacing = new_column("mm_spacing", "", (int) (w / 80 * 20));
     add_column(main_menu, mm_spacing);
 
-    COLUMN* mm_btns = new_column("mm_btns", "", (int)(w/80*30));
+    COLUMN* mm_btns = new_column("mm_btns", "", (int) (w / 80 * 30));
     add_column(main_menu, mm_btns);
     FIELD* key_manager_btn = new_field(0, key_manager_func, 0, "k_m_btn", "Key Manager");
     add_field(mm_btns, key_manager_btn, 0);
@@ -212,12 +218,12 @@ void load() {
     //key manager
     MENU* key_manager = new_menu("key_manager");
 
-    COLUMN* km_file_keys = new_column("km_file_keys", "File", (int)(w/80*20));
+    COLUMN* km_file_keys = new_column("km_file_keys", "File", (int) (w / 80 * 20));
     set_border(km_file_keys, 1, 0, 0);
     compact(km_file_keys);
     add_column(key_manager, km_file_keys);
 
-    COLUMN* km_left_right = new_column("km_left_right", "", (int)(w/80*4));
+    COLUMN* km_left_right = new_column("km_left_right", "", (int) (w / 80 * 4));
     lockColumn(km_left_right, 1, 0);
     add_column(key_manager, km_left_right);
     FIELD* km_right_btn = new_field(0, km_right_func, 0, "kmr_btn", ">>");
@@ -225,12 +231,12 @@ void load() {
     FIELD* km_left_btn = new_field(0, km_left_func, 0, "kmr_btn", "<<");
     add_field(km_left_right, km_left_btn, 12);
 
-    COLUMN* km_keys = new_column("km_keys", "Keys", (int)(w/80*20));
+    COLUMN* km_keys = new_column("km_keys", "Keys", (int) (w / 80 * 20));
     set_border(km_keys, 1, 0, 0);
     compact(km_keys);
     add_column(key_manager, km_keys);
 
-    COLUMN* km_btns = new_column("km_btns", "", (int)(w/80*8));
+    COLUMN* km_btns = new_column("km_btns", "", (int) (w / 80 * 8));
     add_column(key_manager, km_btns);
     FIELD* km_add = new_field(0, km_add_func, 0, "km_add", "Add");
     add_field(km_btns, km_add, -1);
@@ -250,22 +256,22 @@ void load() {
     // enc dec menu
     MENU* enc_dec = new_menu("enc_dec");
 
-    COLUMN* ed_files = new_column("ed_files", "Files", (int)(w/80*20));
+    COLUMN* ed_files = new_column("ed_files", "Files", (int) (w / 80 * 20));
     set_border(ed_files, 1, 0, 0);
     compact(ed_files);
     add_column(enc_dec, ed_files);
 
-    COLUMN* ed_keys = new_column("ed_keys", "Keys", (int)(w/80*20));
+    COLUMN* ed_keys = new_column("ed_keys", "Keys", (int) (w / 80 * 20));
     set_border(ed_keys, 1, 0, 0);
     compact(ed_keys);
     add_column(enc_dec, ed_keys);
 
-    COLUMN* ed_algs = new_column("ed_algs", "Algorithm", (int)(w/80*20));
+    COLUMN* ed_algs = new_column("ed_algs", "Algorithm", (int) (w / 80 * 20));
     set_border(ed_algs, 1, 0, 0);
     compact(ed_algs);
     add_column(enc_dec, ed_algs);
 
-    COLUMN* ed_btns = new_column("ed_btns", "", (int)(w/80*15));
+    COLUMN* ed_btns = new_column("ed_btns", "", (int) (w / 80 * 15));
     add_column(enc_dec, ed_btns);
     FIELD* ed_add = new_field(0, ed_add_func, 0, "ed_add", "Add");
     add_field(ed_btns, ed_add, -1);
@@ -277,6 +283,9 @@ void load() {
     add_field(ed_btns, ed_solve, -1);
     FIELD* ed_run = new_field(0, ed_run_func, 0, "ed_run", "Run");
     add_field(ed_btns, ed_run, -1);
+    char* dest = calloc(MAX_INPUT_LEN, sizeof (char));
+    FIELD* ed_dest = new_field(dest, ed_dest_func, 0, "ed_dest", "Destination");
+    add_field(ed_btns, ed_dest, -1);
     FIELD* ed_back = new_field(0, ed_back_func, 0, "ed_back", "Back");
     add_field(ed_btns, ed_back, -1);
 
@@ -284,14 +293,14 @@ void load() {
 
     add_column(enc_dec_hidden, ed_files);
 
-    COLUMN* ed_keys_aux = new_column("ed_keys_aux", "Choose Key", (int)(w/80*20));
+    COLUMN* ed_keys_aux = new_column("ed_keys_aux", "Choose Key", (int) (w / 80 * 20));
     set_border(ed_keys_aux, 1, 0, 0);
     compact(ed_keys_aux);
     add_column(enc_dec_hidden, ed_keys_aux);
 
     add_column(enc_dec_hidden, ed_algs);
 
-    COLUMN* edh_btns = new_column("edh_btns", "", (int)(w/80*15));
+    COLUMN* edh_btns = new_column("edh_btns", "", (int) (w / 80 * 15));
     FIELD* edh_back = new_field(0, ed_back_func, 0, "edh_back", "Back");
     add_field(edh_btns, edh_back, -1);
     add_column(enc_dec_hidden, edh_btns);
@@ -591,6 +600,16 @@ void ed_addf_func() {
 }
 
 void ed_run_func() {
+    MENU* M = get_active_menu();
+    COLUMN* C = get_column(M, "ed_btns");
+    FIELD* D = get_field(C, "ed_dest");
+    char* temp = D->x;
+    char* dest;
+    if (strlen(temp)) {
+        dest = temp;
+    } else {
+        dest = NULL;
+    }
     COLUMN* files = get_column(get_active_menu(), "ed_files");
     COLUMN* keys = get_column(get_active_menu(), "ed_keys");
     COLUMN* algs = get_column(get_active_menu(), "ed_algs");
@@ -606,22 +625,22 @@ void ed_run_func() {
             k = hex2key(cup->key->key);
             switch (a) {
                 case AES:
-                    er = Aes_Cipher_File(cup->file_name, k, (strlen(cup->key->key) / 8), NULL);
+                    er = Aes_Cipher_File(cup->file_name, k, (strlen(cup->key->key) / 8), dest);
                     break;
                 case DES:
-                    er = DES_encrypt_file(cup->file_name, k);
+                    er = DES_encrypt_file(cup->file_name, k, dest);
                     break;
                 case TRIPLE_DES:
-                    er = triple_DES_encrypt_file(cup->file_name, k);
+                    er = triple_DES_encrypt_file(cup->file_name, k, dest);
                     break;
                 case AES_DECRYPT:
-                    er = Aes_Decipher_File(cup->file_name, k, (strlen(cup->key->key) / 8), NULL);
+                    er = Aes_Decipher_File(cup->file_name, k, (strlen(cup->key->key) / 8), dest);
                     break;
                 case DES_DECRYPT:
-                    er = DES_decrypt_file(cup->file_name, k);
+                    er = DES_decrypt_file(cup->file_name, k, dest);
                     break;
                 case TRIPLE_DES_DECRYPT:
-                    er = triple_DES_encrypt_file(cup->file_name, k);
+                    er = triple_DES_decrypt_file(cup->file_name, k, dest);
                     break;
             }
             free(k);
@@ -827,4 +846,28 @@ void ed_solve_func() {
         }
         F = F->next;
     }
+}
+
+void ed_dest_func() {
+    char str[MAX_INPUT_LEN];
+    MENU* M = get_active_menu();
+    COLUMN* C = get_column(M, "ed_btns");
+    FIELD* F = get_field(C, "ed_dest");
+    char* dest = F->x;
+    for (int i = strlen(dest) - 1; i >= 0; i--) {
+        ungetch(dest[i]);
+    }
+    while (1) {
+        input_box(10, 45, "Destination", "Input destination of encryption/decryption", str);
+        struct stat sb;
+        if(!*str){
+            break;
+        }
+        if (stat(str, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+            break;
+        }else{
+            message_box(6,30,"Error","Given destination not found");
+        }
+    }
+    strcpy(dest, str);
 }

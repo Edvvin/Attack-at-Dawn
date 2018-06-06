@@ -35,6 +35,11 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/DES.o \
+	${OBJECTDIR}/aadcmd.o \
+	${OBJECTDIR}/aes.o \
+	${OBJECTDIR}/hash.o \
+	${OBJECTDIR}/keydecode.o \
 	${OBJECTDIR}/main.o \
 	${OBJECTDIR}/menus.o
 
@@ -53,25 +58,52 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=
+LDLIBSOPTIONS=-L\"../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib/wincon\" "../../../../../Program Files/NetBeans 8.2/pdcrus36lib/wincon/pdcurses.dll"  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
 	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/attack_at_dawn.exe
 
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/attack_at_dawn.exe: ../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib/wincon/pdcurses.dll
+
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/attack_at_dawn.exe: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/attack_at_dawn ${OBJECTFILES} ${LDLIBSOPTIONS}
 
+${OBJECTDIR}/DES.o: DES.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib -include ../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib/curses.h -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DES.o DES.c
+
+${OBJECTDIR}/aadcmd.o: aadcmd.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib -include ../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib/curses.h -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/aadcmd.o aadcmd.c
+
+${OBJECTDIR}/aes.o: aes.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib -include ../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib/curses.h -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/aes.o aes.c
+
+${OBJECTDIR}/hash.o: hash.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib -include ../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib/curses.h -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/hash.o hash.c
+
+${OBJECTDIR}/keydecode.o: keydecode.c
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.c) -O2 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib -include ../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib/curses.h -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/keydecode.o keydecode.c
+
 ${OBJECTDIR}/main.o: main.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.c
+	$(COMPILE.c) -O2 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib -include ../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib/curses.h -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/main.o main.c
 
 ${OBJECTDIR}/menus.o: menus.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
-	$(COMPILE.c) -O2 -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/menus.o menus.c
+	$(COMPILE.c) -O2 -I../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib -include ../../../../../Program\ Files/NetBeans\ 8.2/pdcrus36lib/curses.h -std=c11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/menus.o menus.c
 
 # Subprojects
 .build-subprojects:
@@ -79,6 +111,8 @@ ${OBJECTDIR}/menus.o: menus.c
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
+	${RM} -r ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/pdcurses.dll
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/attack_at_dawn.exe
 
 # Subprojects
 .clean-subprojects:

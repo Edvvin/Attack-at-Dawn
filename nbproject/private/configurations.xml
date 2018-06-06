@@ -26,6 +26,15 @@
       </nativedebugger>
       <runprofile version="9">
         <runcommandpicklist>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" aes -destination</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" bcv</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" batch Ovo.txt Ovo2.txt</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" batch Ovo.txt</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" </runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" aes 12345678901234567890123456789012 C:\Users\edvin\Desktop\Izvstaj\asdf.txt</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" batch script.txt</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" batch scrip.txt</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" aes 12345678901234567890123456789012 </runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}"</runcommand>

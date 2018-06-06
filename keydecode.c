@@ -11,10 +11,10 @@ int hexchar2int(char x){
 
 unsigned char* hex2key(char* key){
     int len = strlen(key);
-    unsigned char* str = malloc(sizeof(unsigned char)*(len/2+1));
+    unsigned char* str = malloc(sizeof(unsigned char)*(len/2+2));
     int i;
     for(i = 0;i<len;i+=2){
-        char c = 0;
+        unsigned char c = 0;
         c+=hexchar2int(key[i]);
         c*=16;
         c+=hexchar2int(key[i+1]);
