@@ -223,7 +223,12 @@ blok DES_decrypt_blok(blok b,blok *keys)
 
 char* writePath(char* path,char* dest)//treba pozvati srand u mainu
 {
-    int len=strlen(path);
+    char *put=(char*)calloc(128,sizeof(char));
+    int smanji=strlen(path)-1;
+    while ((smanji>=0) && (path[smanji]!='\\'))
+        smanji--;
+    strcpy(put,path+smanji+1);
+    int len=strlen(put);
     if (dest!=NULL)
     {
         int slanina=strlen(dest);
@@ -237,18 +242,18 @@ char* writePath(char* path,char* dest)//treba pozvati srand u mainu
     int i=len-1,dodatak,j=0,memind=1,ajnoresejnivde=0;
     char *newpath=(char*)calloc(len+5,sizeof(char)),*tmppath=(char*)calloc(len+5+5,sizeof(char));
     FILE *f;
-    while (path[i]!='.')
+    while (put[i]!='.')
         i--;
     if (dest)
     {
         strcpy(newpath,dest);
-        strncat(newpath,path,i);
+        strncat(newpath,put,i);
         ajnoresejnivde=strlen(dest);
     }
     else
-        strncpy(newpath,path,i);
+        strncpy(newpath,put,i);
     strcpy(tmppath,newpath);
-    strcat(tmppath,path+i);
+    strcat(tmppath,put+i);
     while (f=fopen(tmppath,"r"))
     {
         fclose(f);
@@ -261,10 +266,10 @@ char* writePath(char* path,char* dest)//treba pozvati srand u mainu
             newpath=realloc(newpath,len+(++memind)*5);
             tmppath=realloc(tmppath,len+(memind+1)*5);
         }
-        strcat(tmppath,path+i);
+        strcat(tmppath,put+i);
     }
     newpath=realloc(newpath,len+(++memind)*5);
-    strcat(newpath,path+i);
+    strcat(newpath,put+i);
     //strcat(newpath,".txt");   mozda, mozda ne?
     return(newpath);
 }
