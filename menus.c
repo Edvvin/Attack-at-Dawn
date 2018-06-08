@@ -373,7 +373,7 @@ FIELD* new_field(void* x, void (*func)(void), void (*freeFunc)(void*), char* fie
     }
     F->x = x;
     strcpy(F->field_name, fieldName);
-    strcpy(F->field_string, fieldString);
+    strncpy(F->field_string, fieldString,MAX_FIELD_STRING_LEN-1);
     F->position = -1;
     return F;
 }

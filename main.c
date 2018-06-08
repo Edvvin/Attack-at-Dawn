@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <sys/dirent.h>
 #include "DES.h"
 #include "aes.h"
 #include "aadcmd.h"
@@ -12,7 +13,6 @@
 #define MAX_KEY_NAME_LEN 64
 #define READ_BLOCK_SIZE 10
 #define FOR_ALL_SELECTED(C,F,temp) for(F = C->first_selected;F;temp = F->next_select,remove_selected_field(C,F),F=temp,print_menu(get_active_menu()))
-
 /**
  * @file
  * @author Edvin Maid
@@ -164,6 +164,9 @@ void gen_aux();
  * funkcija koja definise akciju klika na polje is skrivene kolone keys u encryption decryption podmeniju
  */
 void aux_choose();
+
+char** joker(char* path);
+int check(char* s, char* name);
 
 /**
  * @brief struktura koja sluzi za skladistenje kljuca u hexadecimalnoj formi zajedno sa imenom
@@ -419,8 +422,8 @@ void km_edit_func() {
         if (!*name)
             break;
         ((KEY*) F->x)->is_named = 1;
-        strcpy(((KEY*) F->x)->name, name);
-        strcpy(F->field_string, name);
+        strncpy(((KEY*) F->x)->name, name,MAX_FIELD_STRING_LEN);
+        strncpy(F->field_string, name,MAX_FIELD_STRING_LEN);
     }
 }
 
@@ -860,13 +863,13 @@ void ed_dest_func() {
     while (1) {
         input_box(10, 45, "Destination", "Input destination of encryption/decryption", str);
         struct stat sb;
-        if(!*str){
+        if (!*str) {
             break;
         }
         if (stat(str, &sb) == 0 && S_ISDIR(sb.st_mode)) {
             break;
-        }else{
-            message_box(6,30,"Error","Given destination not found");
+        } else {
+            message_box(6, 30, "Error", "Given destination not found");
         }
     }
     strcpy(dest, str);
